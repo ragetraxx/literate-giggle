@@ -4,8 +4,7 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:  # Allows manual triggering
-
+  workflow_dispatch:  # Allows manual trigger
   schedule:
     - cron: '0 0 * * *'  # Runs daily at midnight UTC
 
@@ -26,6 +25,8 @@ jobs:
         run: pip install requests
 
       - name: 🔄 Run Fetch Script
+        env:
+          COUNTRY_CODE: "PH"  # Change to desired country code
         run: python fetch_stations.py
 
       - name: 💾 Commit and Push Changes
