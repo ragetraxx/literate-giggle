@@ -3,31 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Radio Player</title>
+    <title>Radio Browser</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
-        <img src="logo.png" alt="Website Logo" class="website-logo">
-        <h1>Radio Player</h1>
+        <img src="logo.png" alt="Website Logo" class="logo">
+        <h1>Radio Browser</h1>
     </header>
 
-    <div class="search-box">
-        <input type="text" id="countryCode" placeholder="Enter Country Code">
-        <button onclick="searchStations()">Search</button>
-    </div>
+    <main>
+        <section class="search-container">
+            <input type="text" id="countryCode" placeholder="Enter country code (e.g., PH, US)">
+            <button onclick="fetchStations()">Search</button>
+        </section>
 
-    <h2>Search Results</h2>
-    <div id="results" class="station-container"></div>
+        <section class="stations-container" id="stationsList">
+            <!-- Radio stations will be listed here -->
+        </section>
+    </main>
 
-    <h2>Saved Stations</h2>
-    <div id="savedResults" class="station-container"></div>
-
-    <div id="popup" class="hidden">
-        <div class="popup-content">
-            <img id="stationImage" class="rotating" src="" alt="Station Logo">
-            <audio id="audioPlayer" controls autoplay></audio>
-            <button onclick="stopPlayback()">Close</button>
+    <div class="player-container" id="playerContainer">
+        <div class="player">
+            <img id="stationLogo" class="spinning" src="" alt="Station Logo">
+            <audio id="audioPlayer" controls></audio>
+            <button onclick="closePlayer()">Close</button>
         </div>
     </div>
 
