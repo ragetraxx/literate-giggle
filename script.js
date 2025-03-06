@@ -1,58 +1,64 @@
 function fetchStations() {
-    const countryCode = document.getElementById("countryCode").value.trim().toUpperCase();
-    if (!countryCode) {
-        alert("Please enter a country code!");
+    const query = document.getElementById("search-input").value.trim();
+
+    if (!query) {
+        alert("Please enter a country code or station name.");
         return;
     }
 
-    fetch("stations.json")
+    let url;
+    
+    if (query.length === 2) {
+        // If input is a 2-letter code, assume it's a country code
+        url = `https://de1.api.radio-browser.info/json/stations/bycountrycodeexact/${query.toUpperCase()}`;
+    } else {
+        // Otherwise, search by station name
+        url = `https://de1.api.radio-browser.info/json/stations/byname/${encodeURIComponent(query)}`;
+    }
+
+    fetch(url)
         .then(response => response.json())
-        .then(data => {
-            const stationsList = document.getElementById("stationsList");
-            stationsList.innerHTML = ""; // Clear previous results
-
-            const filteredStations = data.filter(station => station.code === countryCode);
-
-            if (filteredStations.length === 0) {
-                stationsList.innerHTML = "<p>No stations found.</p>";
-                return;
-            }
-
-            filteredStations.forEach(station => {
-                const stationElement = document.createElement("div");
-                stationElement.classList.add("station");
-                stationElement.innerHTML = `
-                    <img src="${station.logo || 'default-logo.png'}" alt="${station.name}">
-                    <p>${station.name}</p>
-                `;
-                stationElement.onclick = () => playRadio(station);
-                stationsList.appendChild(stationElement);
-            });
-        })
-        .catch(error => console.error("Error loading stations:", error));
+        .then(data => displayStations(data))
+        .catch(error => console.error("Error fetching stations:", error));
 }
 
-function playRadio(station) {
-    const playerContainer = document.getElementById("playerContainer");
-    const audioPlayer = document.getElementById("audioPlayer");
-    const stationLogo = document.getElementById("stationLogo");
+function displayStations(stations) {
+    const container = document.getElementById("station-list");
+    container.innerHTML = "";
 
-    audioPlayer.src = station.url;
-    stationLogo.src = station.logo || "default-logo.png";
+    if (stations.length === 0) {
+        container.innerHTML = "<p>No stations found.</p>";
+        return;
+    }
 
-    playerContainer.style.display = "flex";
-    stationLogo.classList.remove("stopped"); // Start rotation
-    audioPlayer.play();
+    stations.forEach(station => {
+        const stationItem = document.createElement("div");
+        stationItem.classList.add("station");
+        stationItem.innerHTML = `
+            <img src="${station.favicon || 'default.png'}" alt="Logo">
+            <p>${station.name}</p>
+            <button onclick="playRadio('${station.url}', '${station.name}', '${station.favicon}')">▶ Play</button>
+        `;
+        container.appendChild(stationItem);
+    });
+}
 
-    audioPlayer.onpause = () => stationLogo.classList.add("stopped");
+function playRadio(url, name, logo) {
+    if (!url) {
+        alert("This station has no available stream.");
+        return;
+    }
+
+    document.getElementById("player-title").innerText = name;
+    document.getElementById("player-logo").src = logo || "default.png";
+    document.getElementById("radio-player").src = url;
+    document.getElementById("player-container").style.display = "flex";
+
+    // Start playing
+    document.getElementById("radio-player").play();
 }
 
 function closePlayer() {
-    const playerContainer = document.getElementById("playerContainer");
-    const audioPlayer = document.getElementById("audioPlayer");
-    const stationLogo = document.getElementById("stationLogo");
-
-    audioPlayer.pause();
-    playerContainer.style.display = "none";
-    stationLogo.classList.add("stopped"); // Stop rotation
+    document.getElementById("player-container").style.display = "none";
+    document.getElementById("radio-player").pause();
 }
