@@ -10,7 +10,7 @@ function fetchStations() {
         .then(data => {
             const stationsList = document.getElementById("stationsList");
             stationsList.innerHTML = ""; // Clear previous results
-            
+
             const filteredStations = data.filter(station => station.code === countryCode);
 
             if (filteredStations.length === 0) {
