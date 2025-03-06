@@ -1,12 +1,12 @@
+import os
 import requests
 import json
-import os
 
 API_BASE_URL = "https://de1.api.radio-browser.info/json/stations"
 JSON_FILE = "stations.json"
 
 def fetch_radio_stations(country_code):
-    """Fetch and filter radio stations strictly by country code."""
+    """Fetch and filter radio stations by country code."""
     url = f"{API_BASE_URL}/bycountrycodeexact/{country_code.upper()}"
 
     try:
@@ -15,7 +15,7 @@ def fetch_radio_stations(country_code):
         stations = response.json()
 
         if not stations:
-            print("\n❌ No stations found for this country.")
+            print("\n🚫 No stations found for this country.")
             return []
 
         return [
@@ -23,8 +23,7 @@ def fetch_radio_stations(country_code):
                 "name": s.get("name", "Unknown"),
                 "url": s.get("url", ""),
                 "logo": s.get("favicon", ""),
-                "country": s.get("country", "Unknown"),
-                "code": country_code.upper()  # Save country code for filtering
+                "country": s.get("country", "Unknown")
             }
             for s in stations if s.get("url")  # Ensure stream URL exists
         ]
@@ -33,34 +32,31 @@ def fetch_radio_stations(country_code):
         print("Error fetching radio stations:", e)
         return []
 
-def save_stations_to_json(stations, country_code):
-    """Save or update stations in a JSON file."""
-    if os.path.exists(JSON_FILE):
+def save_to_json(stations):
+    """Save or update radio stations in JSON format."""
+    try:
         with open(JSON_FILE, "r", encoding="utf-8") as file:
-            try:
-                data = json.load(file)
-            except json.JSONDecodeError:
-                data = []
-    else:
-        data = []
+            existing_data = json.load(file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        existing_data = []
 
-    # Remove old entries from the same country
-    data = [station for station in data if station["code"] != country_code.upper()]
+    # Remove duplicate entries for the same station
+    new_data = {s["url"]: s for s in existing_data}
+    for station in stations:
+        new_data[station["url"]] = station
 
-    # Append new stations
-    data.extend(stations)
-
+    # Save updated JSON file
     with open(JSON_FILE, "w", encoding="utf-8") as file:
-        json.dump(data, file, indent=4)
+        json.dump(list(new_data.values()), file, indent=4)
 
-    print(f"✅ {len(stations)} stations saved to {JSON_FILE}")
+    print(f"\n✅ Stations saved to {JSON_FILE}")
 
-# === User Input ===
-country_code = input("Enter country code (e.g., PH, US, GB): ").strip().upper()
+# === GitHub Actions Fix: Get country code from environment variable ===
+country_code = os.getenv("COUNTRY_CODE", "US")  # Default to "US"
 
 if not country_code:
-    print("❌ Please provide a country code.")
+    print("🚫 COUNTRY_CODE environment variable is missing.")
 else:
     stations = fetch_radio_stations(country_code)
     if stations:
-        save_stations_to_json(stations, country_code)
+        save_to_json(stations)
