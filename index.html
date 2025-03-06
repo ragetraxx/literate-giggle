@@ -3,30 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Radio Browser</title>
+    <title>Radio Player</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
-        <img src="logo.png" alt="Website Logo" class="logo">
-        <h1>Radio Browser</h1>
+        <img src="logo.png" alt="Website Logo" class="website-logo">
+        <h1>Radio Player</h1>
     </header>
 
     <main>
-        <section class="search-container">
-            <input type="text" id="countryCode" placeholder="Enter country code (e.g., PH, US)">
-            <button onclick="fetchStations()">Search</button>
-        </section>
-
-        <section class="stations-container" id="stationsList">
-            <!-- Radio stations will be listed here -->
-        </section>
+        <input type="text" id="countryCode" placeholder="Enter country code (e.g., PH, US)">
+        <button onclick="fetchStations()">Search</button>
+        <div id="stationsList" class="stations-container"></div>
     </main>
 
-    <div class="player-container" id="playerContainer">
-        <div class="player">
-            <img id="stationLogo" class="spinning" src="" alt="Station Logo">
-            <audio id="audioPlayer" controls></audio>
+    <div id="playerContainer" class="player-container">
+        <div class="player-content">
+            <img id="stationLogo" class="rotating" src="" alt="Station Logo">
+            <audio id="audioPlayer" controls autoplay></audio>
             <button onclick="closePlayer()">Close</button>
         </div>
     </div>
