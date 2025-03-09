@@ -6,12 +6,12 @@ on:
       - main
   workflow_dispatch:
   schedule:
-    - cron: "*/10 * * * *"  # Runs every 10 minutes to keep stream active
+    - cron: "*/10 * * * *"  # Runs every 10 minutes to restart stream if needed
 
 jobs:
   stream:
     runs-on: ubuntu-latest
-    timeout-minutes: 0  # Prevents GitHub from killing the job
+    timeout-minutes: 3600  # Run for up to 1 hour
 
     steps:
       - name: Checkout Repository
@@ -20,15 +20,12 @@ jobs:
       - name: Set Up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       - name: Install FFmpeg
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
       - name: Run Stream Script
-        run: |
-          while true; do
-            echo "Streaming radio to RTMP at $(date)"
-            python stream.py || echo "Script crashed. Restarting..."
-            sleep 3
-          done
+        env:
+          RTMP_URL: ${{ secrets.RTMP_URL }}
+        run: python stream.py
