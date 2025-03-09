@@ -26,6 +26,13 @@ jobs:
           pip install -r requirements.txt || echo "No requirements.txt found"
           sudo apt-get update && sudo apt-get install -y ffmpeg
 
+      - name: Debug System Resources
+        run: |
+          echo "CPU Info:"
+          lscpu
+          echo "Memory Info:"
+          free -h
+
       - name: Debug - List Repo Files
         run: ls -la
 
