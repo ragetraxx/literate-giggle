@@ -14,32 +14,37 @@ intro_video = "channel.mp4"
 movies_json = "movies.json"
 
 def stream_video(video_url, overlay_text=None):
-    """Streams a video completely before returning."""
+    """Streams a video and ensures it resumes playback if it buffers."""
     try:
         video_url_escaped = shlex.quote(video_url)
 
-        # If overlay text is provided, apply overlay
+        # FFmpeg Command: If overlay text is provided, apply overlay
         if overlay_text:
             overlay_path_escaped = shlex.quote(overlay_path)
             command = f"""
-            ffmpeg -hide_banner -loglevel error -re -i {video_url_escaped} \
+            ffmpeg -hide_banner -loglevel error -re -stream_loop -1 -i {video_url_escaped} \
             -i {overlay_path_escaped} -filter_complex "[1:v]scale2ref=w=iw:h=ih[ovr][base];[base][ovr]overlay=0:0,drawtext=text='{overlay_text}':fontcolor=white:fontsize=24:x=20:y=20" \
             -preset ultrafast -tune zerolatency -c:v libx264 -b:v 3000k -maxrate 3500k -bufsize 7000k -pix_fmt yuv420p -g 50 \
-            -c:a aac -b:a 128k -ar 44100 -f flv -flvflags no_duration_filesize {shlex.quote(rtmp_url)}
+            -c:a aac -b:a 128k -ar 44100 -f flv {shlex.quote(rtmp_url)}
             """
         else:
             # No overlay, just stream the video
             command = f"""
-            ffmpeg -hide_banner -loglevel error -re -i {video_url_escaped} \
+            ffmpeg -hide_banner -loglevel error -re -stream_loop -1 -i {video_url_escaped} \
             -preset ultrafast -tune zerolatency -c:v libx264 -b:v 3000k -maxrate 3500k -bufsize 7000k -pix_fmt yuv420p -g 50 \
-            -c:a aac -b:a 128k -ar 44100 -f flv -flvflags no_duration_filesize {shlex.quote(rtmp_url)}
+            -c:a aac -b:a 128k -ar 44100 -f flv {shlex.quote(rtmp_url)}
             """
 
         print(f"Streaming: {video_url} (Overlay: {'Yes' if overlay_text else 'No'})")
-        
-        # Run FFmpeg and wait for it to finish
-        process = subprocess.Popen(command, shell=True)
-        process.wait()
+
+        # Run FFmpeg process and keep it running
+        while True:
+            process = subprocess.Popen(command, shell=True)
+            process.wait()
+
+            # If FFmpeg stops unexpectedly, restart it
+            print(f"FFmpeg stopped while streaming {video_url}. Restarting...")
+            time.sleep(2)
 
     except Exception as e:
         print(f"Error streaming {video_url}: {e}")
@@ -69,12 +74,14 @@ while True:  # Infinite loop
             time.sleep(5)
             continue  
 
-        # 3️⃣ Select and play a random movie WITH overlay
-        movie = random.choice(valid_movies)
-        video_url = movie["url"]
-        overlay_text = movie["title"].replace(":", "\\:").replace("'", "\\'")  # Escape special characters
+        # 3️⃣ Play movies continuously (WITH overlay)
+        while True:
+            movie = random.choice(valid_movies)
+            video_url = movie["url"]
+            overlay_text = movie["title"].replace(":", "\\:").replace("'", "\\'")  # Escape special characters
 
-        stream_video(video_url, overlay_text)  # With overlay
+            print(f"Playing: {movie['title']} ({video_url})")
+            stream_video(video_url, overlay_text)  # With overlay
 
     except Exception as e:
         print(f"Error: {e}")
