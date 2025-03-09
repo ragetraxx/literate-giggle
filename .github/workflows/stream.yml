@@ -5,6 +5,8 @@ on:
     branches:
       - main  # Runs the workflow when code is pushed to 'main'
   workflow_dispatch:  # Allows manual triggering
+  schedule:
+    - cron: "*/10 * * * *"  # Runs every 10 minutes to ensure it's active
 
 jobs:
   stream:
