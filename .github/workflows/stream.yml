@@ -1,10 +1,10 @@
-name: Video Stream
+name: 24/7 Streaming
 
 on:
   push:
     branches:
-      - main  # Runs when code is pushed to 'main'
-  workflow_dispatch:  # Allows manual triggering
+      - main
+  workflow_dispatch:
   schedule:
     - cron: "*/10 * * * *"  # Runs every 10 minutes to ensure it's active
 
@@ -22,28 +22,13 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install Dependencies
-        run: |
-          pip install -r requirements.txt || echo "No requirements.txt found"
-          sudo apt-get update && sudo apt-get install -y ffmpeg
-
-      - name: Debug System Resources
-        run: |
-          echo "CPU Info:"
-          lscpu
-          echo "Memory Info:"
-          free -h
-
-      - name: Debug - List Repo Files
-        run: ls -la
-
-      - name: Debug - Check stream.py
-        run: cat stream.py || echo "stream.py not found!"
+      - name: Install FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
       - name: Run Stream Script
         run: |
           while true; do
-            echo "Stream is running at $(date)"  # Prevents GitHub from stopping the job
+            echo "Streaming to RTMP at $(date)"
             python stream.py || echo "Script crashed. Restarting..."
-            sleep 3  # Wait 3 seconds before restarting
+            sleep 3
           done
