@@ -6,22 +6,21 @@ import time
 # RTMP Server URL
 rtmp_url = "rtmp://ragetv:Blaze1110@ssh101.gia.tv/giatv-ragetv/ragetv"
 
-# Video/audio source (replace this with your link)
-stream_url = "https://stream.zeno.fm/q1n2wyfs7x8uv"  # Example: "https://example.com/stream.m3u8"
+# Audio Stream URL (Zeno.fm)
+stream_url = "https://stream.zeno.fm/q1n2wyfs7x8uv"
 
 # Overlay image
-overlay_path = "IMG_20250309_112455.png"
+overlay_path = "overlay.png"
 
-def stream_video():
-    """Streams a media link continuously with overlay."""
-    video_url_escaped = shlex.quote(stream_url)
+def stream_audio():
+    """Streams an audio link continuously with an image overlay."""
+    stream_escaped = shlex.quote(stream_url)
     overlay_escaped = shlex.quote(overlay_path)
 
-    # FFmpeg Command with overlay
+    # FFmpeg Command: Audio stream + static overlay image
     command = f"""
-    ffmpeg -re -i {video_url_escaped} -i {overlay_escaped} \
-    -filter_complex "[1:v]scale2ref=w=iw:h=ih[ovr][base];[base][ovr]overlay=0:0" \
-    -preset ultrafast -tune zerolatency -c:v libx264 -b:v 1500k -maxrate 2000k -bufsize 4000k -pix_fmt yuv420p -g 25 \
+    ffmpeg -re -loop 1 -i {overlay_escaped} -i {stream_escaped} \
+    -vf "scale=1280:720" -preset ultrafast -tune zerolatency -c:v libx264 -b:v 1500k -maxrate 2000k -bufsize 4000k \
     -c:a aac -b:a 128k -ar 44100 -f flv {shlex.quote(rtmp_url)}
     """
 
@@ -34,4 +33,4 @@ def stream_video():
         time.sleep(2)  # Prevent fast loop crashes
 
 if __name__ == "__main__":
-    stream_video()
+    stream_audio()
