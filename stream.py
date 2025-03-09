@@ -11,10 +11,28 @@ rtmp_url = "rtmp://ragetv:Blaze1110@ssh101.gia.tv/giatv-ragetv/ragetv"
 # File paths
 overlay_path = "overlay.png"
 intro_video = "channel.mp4"
-movies_json = "movies.json"
+movies_json = "/mnt/data/movies.json"  # Path to uploaded JSON file
+
+def load_movies():
+    """Loads movies from the JSON file and returns a list of valid entries."""
+    if not os.path.exists(movies_json):
+        print("Error: movies.json not found! Retrying in 5 seconds...")
+        time.sleep(5)
+        return []
+
+    with open(movies_json, "r") as file:
+        movies = json.load(file)
+
+    # Filter only movies that have a valid "url" and "title"
+    valid_movies = [m for m in movies if "url" in m and "title" in m]
+    if not valid_movies:
+        print("No valid movies found in movies.json. Retrying in 5 seconds...")
+        time.sleep(5)
+
+    return valid_movies
 
 def stream_video(video_url, overlay_text=None):
-    """Streams a video with FFmpeg and auto-restarts if needed."""
+    """Streams a video with FFmpeg and restarts if it crashes."""
     video_url_escaped = shlex.quote(video_url)
 
     # FFmpeg Command: Apply overlay only if text is provided
@@ -48,26 +66,14 @@ while True:
             print("Playing channel.mp4 before the movies...")
             stream_video(intro_video)  # No overlay
 
-        # 2️⃣ Load movies from JSON
-        if not os.path.exists(movies_json):
-            print("Error: movies.json not found! Retrying in 5 seconds...")
-            time.sleep(5)
-            continue  
-
-        with open(movies_json, "r") as file:
-            movies = json.load(file)
-
-        # Filter valid movies
-        valid_movies = [m for m in movies if "url" in m and "title" in m]
-
-        if not valid_movies:
-            print("No valid movies found in movies.json. Retrying in 5 seconds...")
-            time.sleep(5)
-            continue  
+        # 2️⃣ Load valid movies from `movies.json`
+        movies = load_movies()
+        if not movies:
+            continue  # Retry if no valid movies found
 
         # 3️⃣ Play movies continuously (RANDOM ORDER)
         while True:
-            movie = random.choice(valid_movies)  # Select a random movie
+            movie = random.choice(movies)  # Select a random movie
             video_url = movie["url"]
             overlay_text = movie["title"].replace(":", "\\:").replace("'", "\\'")  # Escape special characters
 
