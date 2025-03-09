@@ -26,21 +26,21 @@ def fetch_movies():
         return []
 
 def stream_video(video_url, overlay_text=None):
-    """Streams a video using FFmpeg, ensuring smooth playback."""
+    """Streams a video using FFmpeg, ensuring smooth playback without timeout."""
     video_url_escaped = shlex.quote(video_url)
 
     # FFmpeg Command: Apply overlay only if text is provided
     if overlay_text:
         overlay_escaped = shlex.quote(overlay_url)
         command = f"""
-        ffmpeg -hide_banner -loglevel debug -fflags +nobuffer -flags low_delay -rtbufsize 2M -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 -re -i {video_url_escaped} \
+        ffmpeg -hide_banner -loglevel debug -fflags +nobuffer -flags low_delay -rtbufsize 4M -timeout 5000000 -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 10 -re -i {video_url_escaped} \
         -i {overlay_escaped} -filter_complex "[1:v]scale2ref=w=iw:h=ih[ovr][base];[base][ovr]overlay=0:0,drawtext=text='{overlay_text}':fontcolor=white:fontsize=24:x=20:y=20" \
         -preset ultrafast -tune zerolatency -c:v libx264 -b:v 800k -maxrate 1000k -bufsize 2000k -pix_fmt yuv420p -g 25 \
         -c:a aac -b:a 64k -ar 32000 -f flv {shlex.quote(rtmp_url)}
         """
     else:
         command = f"""
-        ffmpeg -hide_banner -loglevel debug -fflags +nobuffer -flags low_delay -rtbufsize 2M -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 -re -i {video_url_escaped} \
+        ffmpeg -hide_banner -loglevel debug -fflags +nobuffer -flags low_delay -rtbufsize 4M -timeout 5000000 -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 10 -re -i {video_url_escaped} \
         -preset ultrafast -tune zerolatency -c:v libx264 -b:v 800k -maxrate 1000k -bufsize 2000k -pix_fmt yuv420p -g 25 \
         -c:a aac -b:a 64k -ar 32000 -f flv {shlex.quote(rtmp_url)}
         """
