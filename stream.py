@@ -14,15 +14,15 @@ intro_video = "channel.mp4"
 movies_json = "movies.json"
 
 def stream_video(video_url, overlay_text=None):
-    """Streams a video and ensures it resumes playback if it buffers."""
+    """Streams a video once and restarts if it crashes."""
     try:
         video_url_escaped = shlex.quote(video_url)
 
-        # FFmpeg Command: If overlay text is provided, apply overlay
+        # FFmpeg Command: Apply overlay if text is given
         if overlay_text:
             overlay_path_escaped = shlex.quote(overlay_path)
             command = f"""
-            ffmpeg -hide_banner -loglevel error -re -stream_loop -1 -i {video_url_escaped} \
+            ffmpeg -hide_banner -loglevel error -re -i {video_url_escaped} \
             -i {overlay_path_escaped} -filter_complex "[1:v]scale2ref=w=iw:h=ih[ovr][base];[base][ovr]overlay=0:0,drawtext=text='{overlay_text}':fontcolor=white:fontsize=24:x=20:y=20" \
             -preset ultrafast -tune zerolatency -c:v libx264 -b:v 3000k -maxrate 3500k -bufsize 7000k -pix_fmt yuv420p -g 50 \
             -c:a aac -b:a 128k -ar 44100 -f flv {shlex.quote(rtmp_url)}
@@ -30,29 +30,26 @@ def stream_video(video_url, overlay_text=None):
         else:
             # No overlay, just stream the video
             command = f"""
-            ffmpeg -hide_banner -loglevel error -re -stream_loop -1 -i {video_url_escaped} \
+            ffmpeg -hide_banner -loglevel error -re -i {video_url_escaped} \
             -preset ultrafast -tune zerolatency -c:v libx264 -b:v 3000k -maxrate 3500k -bufsize 7000k -pix_fmt yuv420p -g 50 \
             -c:a aac -b:a 128k -ar 44100 -f flv {shlex.quote(rtmp_url)}
             """
 
         print(f"Streaming: {video_url} (Overlay: {'Yes' if overlay_text else 'No'})")
 
-        # Run FFmpeg process and keep it running
-        while True:
+        while True:  # Keep FFmpeg running even if it crashes
             process = subprocess.Popen(command, shell=True)
             process.wait()
-
-            # If FFmpeg stops unexpectedly, restart it
-            print(f"FFmpeg stopped while streaming {video_url}. Restarting...")
-            time.sleep(2)
+            print(f"FFmpeg crashed while streaming {video_url}. Restarting...")
+            time.sleep(3)
 
     except Exception as e:
         print(f"Error streaming {video_url}: {e}")
-        time.sleep(2)  # Short delay before retrying
+        time.sleep(5)  # Short delay before retrying
 
-while True:  # Infinite loop
+while True:  # Main infinite loop
     try:
-        # 1️⃣ Play `channel.mp4` first WITHOUT overlay
+        # 1️⃣ Play `channel.mp4` ONCE before movies start
         if os.path.exists(intro_video):
             print("Playing channel.mp4 before the movie...")
             stream_video(intro_video)  # No overlay
