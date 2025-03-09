@@ -8,10 +8,11 @@ import time
 # RTMP Server URL
 rtmp_url = "rtmp://ragetv:Blaze1110@ssh101.gia.tv/giatv-ragetv/ragetv"
 
-# File paths
-overlay_path = "overlay.png"
-intro_video = "channel.mp4"
-movies_json = "/mnt/data/movies.json"  # Path to uploaded JSON file
+# File paths (Assuming movies.json is in the same directory as stream.py)
+base_path = os.path.dirname(os.path.abspath(__file__))
+overlay_path = os.path.join(base_path, "overlay.png")
+intro_video = os.path.join(base_path, "channel.mp4")
+movies_json = os.path.join(base_path, "movies.json")
 
 def load_movies():
     """Loads movies from the JSON file and returns a list of valid entries."""
@@ -23,7 +24,6 @@ def load_movies():
     with open(movies_json, "r") as file:
         movies = json.load(file)
 
-    # Filter only movies that have a valid "url" and "title"
     valid_movies = [m for m in movies if "url" in m and "title" in m]
     if not valid_movies:
         print("No valid movies found in movies.json. Retrying in 5 seconds...")
@@ -39,15 +39,15 @@ def stream_video(video_url, overlay_text=None):
     if overlay_text:
         overlay_path_escaped = shlex.quote(overlay_path)
         command = f"""
-        ffmpeg -re -i {video_url_escaped} \
+        ffmpeg -hide_banner -loglevel error -fflags +nobuffer -flags low_delay -rtbufsize 1M -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 -i {video_url_escaped} \
         -i {overlay_path_escaped} -filter_complex "[1:v]scale2ref=w=iw:h=ih[ovr][base];[base][ovr]overlay=0:0,drawtext=text='{overlay_text}':fontcolor=white:fontsize=24:x=20:y=20" \
-        -preset ultrafast -tune zerolatency -c:v libx264 -b:v 1500k -maxrate 2000k -bufsize 4000k -pix_fmt yuv420p -g 25 \
+        -preset ultrafast -tune zerolatency -c:v libx264 -b:v 1200k -maxrate 1500k -bufsize 3000k -pix_fmt yuv420p -g 25 \
         -c:a aac -b:a 96k -ar 44100 -f flv {shlex.quote(rtmp_url)}
         """
     else:
         command = f"""
-        ffmpeg -re -i {video_url_escaped} \
-        -preset ultrafast -tune zerolatency -c:v libx264 -b:v 1500k -maxrate 2000k -bufsize 4000k -pix_fmt yuv420p -g 25 \
+        ffmpeg -hide_banner -loglevel error -fflags +nobuffer -flags low_delay -rtbufsize 1M -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 -i {video_url_escaped} \
+        -preset ultrafast -tune zerolatency -c:v libx264 -b:v 1200k -maxrate 1500k -bufsize 3000k -pix_fmt yuv420p -g 25 \
         -c:a aac -b:a 96k -ar 44100 -f flv {shlex.quote(rtmp_url)}
         """
 
