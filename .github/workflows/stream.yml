@@ -10,7 +10,8 @@ on:
 
 jobs:
   stream:
-    runs-on: ubuntu-latest  # Runs on a Linux environment
+    runs-on: ubuntu-latest
+    timeout-minutes: 0  # Prevents GitHub from killing the job
 
     steps:
       - name: Checkout Repository
@@ -42,6 +43,7 @@ jobs:
       - name: Run Stream Script
         run: |
           while true; do
+            echo "Stream is running at $(date)"  # Prevents GitHub from stopping the job
             python stream.py || echo "Script crashed. Restarting..."
             sleep 3  # Wait 3 seconds before restarting
           done
