@@ -14,38 +14,30 @@ intro_video = "channel.mp4"
 movies_json = "movies.json"
 
 def stream_video(video_url, overlay_text=None):
-    """Streams a video once and restarts if it crashes."""
-    try:
-        video_url_escaped = shlex.quote(video_url)
+    """Streams a video and ensures FFmpeg restarts if it crashes."""
+    video_url_escaped = shlex.quote(video_url)
 
-        # FFmpeg Command: Apply overlay only if text is provided
-        if overlay_text:
-            overlay_path_escaped = shlex.quote(overlay_path)
-            command = f"""
-            ffmpeg -hide_banner -loglevel error -fflags +nobuffer -flags low_delay -strict experimental -re -i {video_url_escaped} \
-            -i {overlay_path_escaped} -filter_complex "[1:v]scale2ref=w=iw:h=ih[ovr][base];[base][ovr]overlay=0:0,drawtext=text='{overlay_text}':fontcolor=white:fontsize=24:x=20:y=20" \
-            -preset ultrafast -tune zerolatency -c:v libx264 -b:v 1500k -maxrate 2000k -bufsize 4000k -pix_fmt yuv420p -g 25 \
-            -c:a aac -b:a 96k -ar 44100 -f flv {shlex.quote(rtmp_url)}
-            """
-        else:
-            # No overlay, just stream the video
-            command = f"""
-            ffmpeg -hide_banner -loglevel error -fflags +nobuffer -flags low_delay -strict experimental -re -i {video_url_escaped} \
-            -preset ultrafast -tune zerolatency -c:v libx264 -b:v 1500k -maxrate 2000k -bufsize 4000k -pix_fmt yuv420p -g 25 \
-            -c:a aac -b:a 96k -ar 44100 -f flv {shlex.quote(rtmp_url)}
-            """
+    # FFmpeg Command: Apply overlay only if text is provided
+    if overlay_text:
+        overlay_path_escaped = shlex.quote(overlay_path)
+        command = f"""
+        ffmpeg -hide_banner -loglevel error -fflags +nobuffer -flags low_delay -strict experimental -re -i {video_url_escaped} \
+        -i {overlay_path_escaped} -filter_complex "[1:v]scale2ref=w=iw:h=ih[ovr][base];[base][ovr]overlay=0:0,drawtext=text='{overlay_text}':fontcolor=white:fontsize=24:x=20:y=20" \
+        -preset ultrafast -tune zerolatency -c:v libx264 -b:v 1500k -maxrate 2000k -bufsize 4000k -pix_fmt yuv420p -g 25 \
+        -c:a aac -b:a 96k -ar 44100 -f flv {shlex.quote(rtmp_url)}
+        """
+    else:
+        # No overlay, just stream the video
+        command = f"""
+        ffmpeg -hide_banner -loglevel error -fflags +nobuffer -flags low_delay -strict experimental -re -i {video_url_escaped} \
+        -preset ultrafast -tune zerolatency -c:v libx264 -b:v 1500k -maxrate 2000k -bufsize 4000k -pix_fmt yuv420p -g 25 \
+        -c:a aac -b:a 96k -ar 44100 -f flv {shlex.quote(rtmp_url)}
+        """
 
-        print(f"Streaming: {video_url} (Overlay: {'Yes' if overlay_text else 'No'})")
-
-        while True:  # Keep FFmpeg running even if it crashes
-            process = subprocess.Popen(command, shell=True)
-            process.wait()
-            print(f"FFmpeg crashed while streaming {video_url}. Restarting...")
-            time.sleep(3)
-
-    except Exception as e:
-        print(f"Error streaming {video_url}: {e}")
-        time.sleep(5)  # Short delay before retrying
+    print(f"Streaming: {video_url} (Overlay: {'Yes' if overlay_text else 'No'})")
+    
+    process = subprocess.Popen(command, shell=True)
+    process.wait()
 
 while True:  # Main infinite loop
     try:
@@ -73,12 +65,12 @@ while True:  # Main infinite loop
 
         # 3️⃣ Play movies continuously (WITH overlay)
         while True:
-            movie = random.choice(valid_movies)
-            video_url = movie["url"]
-            overlay_text = movie["title"].replace(":", "\\:").replace("'", "\\'")  # Escape special characters
+            for movie in valid_movies:  # Play all movies in order
+                video_url = movie["url"]
+                overlay_text = movie["title"].replace(":", "\\:").replace("'", "\\'")  # Escape special characters
 
-            print(f"Playing: {movie['title']} ({video_url})")
-            stream_video(video_url, overlay_text)  # With overlay
+                print(f"Playing: {movie['title']} ({video_url})")
+                stream_video(video_url, overlay_text)  # With overlay
 
     except Exception as e:
         print(f"Error: {e}")
