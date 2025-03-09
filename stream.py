@@ -18,21 +18,21 @@ def stream_video(video_url, overlay_text=None):
     try:
         video_url_escaped = shlex.quote(video_url)
 
-        # FFmpeg Command: Apply overlay if text is given
+        # FFmpeg Command: Apply overlay only if text is provided
         if overlay_text:
             overlay_path_escaped = shlex.quote(overlay_path)
             command = f"""
-            ffmpeg -hide_banner -loglevel error -re -i {video_url_escaped} \
+            ffmpeg -hide_banner -loglevel error -fflags +nobuffer -flags low_delay -strict experimental -re -i {video_url_escaped} \
             -i {overlay_path_escaped} -filter_complex "[1:v]scale2ref=w=iw:h=ih[ovr][base];[base][ovr]overlay=0:0,drawtext=text='{overlay_text}':fontcolor=white:fontsize=24:x=20:y=20" \
-            -preset ultrafast -tune zerolatency -c:v libx264 -b:v 3000k -maxrate 3500k -bufsize 7000k -pix_fmt yuv420p -g 50 \
-            -c:a aac -b:a 128k -ar 44100 -f flv {shlex.quote(rtmp_url)}
+            -preset ultrafast -tune zerolatency -c:v libx264 -b:v 1500k -maxrate 2000k -bufsize 4000k -pix_fmt yuv420p -g 25 \
+            -c:a aac -b:a 96k -ar 44100 -f flv {shlex.quote(rtmp_url)}
             """
         else:
             # No overlay, just stream the video
             command = f"""
-            ffmpeg -hide_banner -loglevel error -re -i {video_url_escaped} \
-            -preset ultrafast -tune zerolatency -c:v libx264 -b:v 3000k -maxrate 3500k -bufsize 7000k -pix_fmt yuv420p -g 50 \
-            -c:a aac -b:a 128k -ar 44100 -f flv {shlex.quote(rtmp_url)}
+            ffmpeg -hide_banner -loglevel error -fflags +nobuffer -flags low_delay -strict experimental -re -i {video_url_escaped} \
+            -preset ultrafast -tune zerolatency -c:v libx264 -b:v 1500k -maxrate 2000k -bufsize 4000k -pix_fmt yuv420p -g 25 \
+            -c:a aac -b:a 96k -ar 44100 -f flv {shlex.quote(rtmp_url)}
             """
 
         print(f"Streaming: {video_url} (Overlay: {'Yes' if overlay_text else 'No'})")
