@@ -14,7 +14,7 @@ intro_video = "channel.mp4"
 movies_json = "movies.json"
 
 def stream_video(video_url, overlay_text=None):
-    """Streams a video to RTMP. Adds overlay only if overlay_text is provided."""
+    """Streams a video completely before returning."""
     try:
         video_url_escaped = shlex.quote(video_url)
 
@@ -22,7 +22,7 @@ def stream_video(video_url, overlay_text=None):
         if overlay_text:
             overlay_path_escaped = shlex.quote(overlay_path)
             command = f"""
-            ffmpeg -hide_banner -loglevel error -fflags +genpts -re -i {video_url_escaped} \
+            ffmpeg -hide_banner -loglevel error -re -i {video_url_escaped} \
             -i {overlay_path_escaped} -filter_complex "[1:v]scale2ref=w=iw:h=ih[ovr][base];[base][ovr]overlay=0:0,drawtext=text='{overlay_text}':fontcolor=white:fontsize=24:x=20:y=20" \
             -preset ultrafast -tune zerolatency -c:v libx264 -b:v 3000k -maxrate 3500k -bufsize 7000k -pix_fmt yuv420p -g 50 \
             -c:a aac -b:a 128k -ar 44100 -f flv -flvflags no_duration_filesize {shlex.quote(rtmp_url)}
@@ -30,17 +30,20 @@ def stream_video(video_url, overlay_text=None):
         else:
             # No overlay, just stream the video
             command = f"""
-            ffmpeg -hide_banner -loglevel error -fflags +genpts -re -i {video_url_escaped} \
+            ffmpeg -hide_banner -loglevel error -re -i {video_url_escaped} \
             -preset ultrafast -tune zerolatency -c:v libx264 -b:v 3000k -maxrate 3500k -bufsize 7000k -pix_fmt yuv420p -g 50 \
             -c:a aac -b:a 128k -ar 44100 -f flv -flvflags no_duration_filesize {shlex.quote(rtmp_url)}
             """
 
         print(f"Streaming: {video_url} (Overlay: {'Yes' if overlay_text else 'No'})")
-        subprocess.run(command, shell=True, check=True)
+        
+        # Run FFmpeg and wait for it to finish
+        process = subprocess.Popen(command, shell=True)
+        process.wait()
 
-    except subprocess.CalledProcessError:
-        print(f"FFmpeg crashed while streaming {video_url}, restarting...")
-        time.sleep(2)  # Short delay before restarting
+    except Exception as e:
+        print(f"Error streaming {video_url}: {e}")
+        time.sleep(2)  # Short delay before retrying
 
 while True:  # Infinite loop
     try:
