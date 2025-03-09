@@ -10,7 +10,7 @@ rtmp_url = "rtmp://ragetv:Blaze1110@ssh101.gia.tv/giatv-ragetv/ragetv"
 stream_url = "https://stream.zeno.fm/q1n2wyfs7x8uv"  # Example: "https://example.com/stream.m3u8"
 
 # Overlay image
-overlay_path = "overlay.png"
+overlay_path = "IMG_20250309_112455.png"
 
 def stream_video():
     """Streams a media link continuously with overlay."""
