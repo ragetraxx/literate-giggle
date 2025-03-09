@@ -8,8 +8,10 @@ import time
 # RTMP Server URL
 rtmp_url = "rtmp://ragetv:Blaze1110@ssh101.gia.tv/giatv-ragetv/ragetv"
 
-# File paths (Assuming movies.json is in the same directory as stream.py)
+# Base path (directory where this script is located)
 base_path = os.path.dirname(os.path.abspath(__file__))
+
+# File paths
 overlay_path = os.path.join(base_path, "overlay.png")
 intro_video = os.path.join(base_path, "channel.mp4")
 movies_json = os.path.join(base_path, "movies.json")
@@ -17,7 +19,7 @@ movies_json = os.path.join(base_path, "movies.json")
 def load_movies():
     """Loads movies from the JSON file and returns a list of valid entries."""
     if not os.path.exists(movies_json):
-        print("Error: movies.json not found! Retrying in 5 seconds...")
+        print(f"Error: {movies_json} not found! Retrying in 5 seconds...")
         time.sleep(5)
         return []
 
