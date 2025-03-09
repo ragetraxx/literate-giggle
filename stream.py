@@ -3,6 +3,7 @@ import random
 import shlex
 import subprocess
 import time
+import requests
 
 # RTMP Server URL
 rtmp_url = "rtmp://ragetv:Blaze1110@ssh101.gia.tv/giatv-ragetv/ragetv"
@@ -15,7 +16,6 @@ overlay_url = "https://raw.githubusercontent.com/ragetraxx/literate-giggle/main/
 def fetch_movies():
     """Fetches the latest movies.json from GitHub."""
     try:
-        import requests
         response = requests.get(movies_json_url)
         response.raise_for_status()
         movies = response.json()
@@ -29,23 +29,24 @@ def stream_video(video_url, overlay_text=None):
     """Streams a video using FFmpeg, ensuring smooth playback."""
     video_url_escaped = shlex.quote(video_url)
 
+    # FFmpeg Command: Apply overlay only if text is provided
     if overlay_text:
         overlay_escaped = shlex.quote(overlay_url)
         command = f"""
-        ffmpeg -hide_banner -loglevel error -fflags +nobuffer -flags low_delay -rtbufsize 1M -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 -re -i {video_url_escaped} \
+        ffmpeg -hide_banner -loglevel debug -fflags +nobuffer -flags low_delay -rtbufsize 2M -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 -re -i {video_url_escaped} \
         -i {overlay_escaped} -filter_complex "[1:v]scale2ref=w=iw:h=ih[ovr][base];[base][ovr]overlay=0:0,drawtext=text='{overlay_text}':fontcolor=white:fontsize=24:x=20:y=20" \
-        -preset ultrafast -tune zerolatency -c:v libx264 -b:v 1200k -maxrate 1500k -bufsize 3000k -pix_fmt yuv420p -g 25 \
-        -c:a aac -b:a 96k -ar 44100 -f flv {shlex.quote(rtmp_url)}
+        -preset ultrafast -tune zerolatency -c:v libx264 -b:v 800k -maxrate 1000k -bufsize 2000k -pix_fmt yuv420p -g 25 \
+        -c:a aac -b:a 64k -ar 32000 -f flv {shlex.quote(rtmp_url)}
         """
     else:
         command = f"""
-        ffmpeg -hide_banner -loglevel error -fflags +nobuffer -flags low_delay -rtbufsize 1M -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 -re -i {video_url_escaped} \
-        -preset ultrafast -tune zerolatency -c:v libx264 -b:v 1200k -maxrate 1500k -bufsize 3000k -pix_fmt yuv420p -g 25 \
-        -c:a aac -b:a 96k -ar 44100 -f flv {shlex.quote(rtmp_url)}
+        ffmpeg -hide_banner -loglevel debug -fflags +nobuffer -flags low_delay -rtbufsize 2M -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 -re -i {video_url_escaped} \
+        -preset ultrafast -tune zerolatency -c:v libx264 -b:v 800k -maxrate 1000k -bufsize 2000k -pix_fmt yuv420p -g 25 \
+        -c:a aac -b:a 64k -ar 32000 -f flv {shlex.quote(rtmp_url)}
         """
 
     print(f"Streaming: {video_url} (Overlay: {'Yes' if overlay_text else 'No'})")
-    
+
     while True:
         process = subprocess.Popen(command, shell=True)
         process.wait()
