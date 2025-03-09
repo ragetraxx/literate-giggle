@@ -5,7 +5,7 @@ import shlex
 import time
 import subprocess
 
-# RTMP server
+# RTMP Server URL
 rtmp_url = "rtmp://ragetv:Blaze1110@ssh101.gia.tv/giatv-ragetv/ragetv"
 
 # File paths
@@ -14,17 +14,17 @@ intro_video = "channel.mp4"
 movies_json = "movies.json"
 
 def stream_video(video_url, overlay_text):
-    """Streams a video to RTMP with an overlay."""
+    """Streams a video to RTMP with an overlay, optimized for low latency."""
     while True:  # Restart if FFmpeg crashes
         try:
             video_url_escaped = shlex.quote(video_url)
             overlay_path_escaped = shlex.quote(overlay_path)
 
             command = f"""
-            ffmpeg -re -i {video_url_escaped} -i {overlay_path_escaped} \
-            -filter_complex "[1:v]scale2ref=w=iw:h=ih[ovr][base];[base][ovr]overlay=0:0,drawtext=text='{overlay_text}':fontcolor=white:fontsize=24:x=20:y=20" \
-            -c:v libx264 -preset veryfast -b:v 3000k -maxrate 3500k -bufsize 7000k -pix_fmt yuv420p -g 50 \
-            -c:a aac -b:a 128k -ar 44100 -f flv {shlex.quote(rtmp_url)}
+            ffmpeg -hide_banner -loglevel error -fflags +genpts -re -i {video_url_escaped} \
+            -i {overlay_path_escaped} -filter_complex "[1:v]scale2ref=w=iw:h=ih[ovr][base];[base][ovr]overlay=0:0,drawtext=text='{overlay_text}':fontcolor=white:fontsize=24:x=20:y=20" \
+            -preset ultrafast -tune zerolatency -c:v libx264 -b:v 3000k -maxrate 3500k -bufsize 7000k -pix_fmt yuv420p -g 50 \
+            -c:a aac -b:a 128k -ar 44100 -f flv -flvflags no_duration_filesize {shlex.quote(rtmp_url)}
             """
 
             print(f"Streaming: {overlay_text} ({video_url})")
@@ -36,7 +36,7 @@ def stream_video(video_url, overlay_text):
 
 while True:  # Infinite loop
     try:
-        # Load movies from JSON
+        # Check if movies.json exists
         if not os.path.exists(movies_json):
             print("Error: movies.json not found! Retrying in 5 seconds...")
             time.sleep(5)
@@ -58,12 +58,12 @@ while True:  # Infinite loop
         video_url = movie["url"]
         overlay_text = movie["title"].replace(":", "\\:").replace("'", "\\'")  # Escape special characters
 
-        # Play channel.mp4 before the movie
+        # 1️⃣ Play channel.mp4 first (only if it exists)
         if os.path.exists(intro_video):
             print("Playing channel.mp4 before the movie...")
             stream_video(intro_video, "Welcome to RageTV")
 
-        # Play the selected movie
+        # 2️⃣ Play the selected movie from movies.json
         stream_video(video_url, overlay_text)
 
     except Exception as e:
