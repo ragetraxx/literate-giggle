@@ -13,30 +13,43 @@ overlay_path = "overlay.png"
 intro_video = "channel.mp4"
 movies_json = "movies.json"
 
-def stream_video(video_url, overlay_text):
-    """Streams a video to RTMP with an overlay, optimized for low latency."""
-    while True:  # Restart if FFmpeg crashes
-        try:
-            video_url_escaped = shlex.quote(video_url)
-            overlay_path_escaped = shlex.quote(overlay_path)
+def stream_video(video_url, overlay_text=None):
+    """Streams a video to RTMP. Adds overlay only if overlay_text is provided."""
+    try:
+        video_url_escaped = shlex.quote(video_url)
 
+        # If overlay text is provided, apply overlay
+        if overlay_text:
+            overlay_path_escaped = shlex.quote(overlay_path)
             command = f"""
             ffmpeg -hide_banner -loglevel error -fflags +genpts -re -i {video_url_escaped} \
             -i {overlay_path_escaped} -filter_complex "[1:v]scale2ref=w=iw:h=ih[ovr][base];[base][ovr]overlay=0:0,drawtext=text='{overlay_text}':fontcolor=white:fontsize=24:x=20:y=20" \
             -preset ultrafast -tune zerolatency -c:v libx264 -b:v 3000k -maxrate 3500k -bufsize 7000k -pix_fmt yuv420p -g 50 \
             -c:a aac -b:a 128k -ar 44100 -f flv -flvflags no_duration_filesize {shlex.quote(rtmp_url)}
             """
+        else:
+            # No overlay, just stream the video
+            command = f"""
+            ffmpeg -hide_banner -loglevel error -fflags +genpts -re -i {video_url_escaped} \
+            -preset ultrafast -tune zerolatency -c:v libx264 -b:v 3000k -maxrate 3500k -bufsize 7000k -pix_fmt yuv420p -g 50 \
+            -c:a aac -b:a 128k -ar 44100 -f flv -flvflags no_duration_filesize {shlex.quote(rtmp_url)}
+            """
 
-            print(f"Streaming: {overlay_text} ({video_url})")
-            subprocess.run(command, shell=True, check=True)
+        print(f"Streaming: {video_url} (Overlay: {'Yes' if overlay_text else 'No'})")
+        subprocess.run(command, shell=True, check=True)
 
-        except subprocess.CalledProcessError:
-            print(f"FFmpeg crashed while streaming {overlay_text}, restarting...")
-            time.sleep(2)  # Short delay before restarting
+    except subprocess.CalledProcessError:
+        print(f"FFmpeg crashed while streaming {video_url}, restarting...")
+        time.sleep(2)  # Short delay before restarting
 
 while True:  # Infinite loop
     try:
-        # Check if movies.json exists
+        # 1️⃣ Play `channel.mp4` first WITHOUT overlay
+        if os.path.exists(intro_video):
+            print("Playing channel.mp4 before the movie...")
+            stream_video(intro_video)  # No overlay
+
+        # 2️⃣ Load movies from JSON
         if not os.path.exists(movies_json):
             print("Error: movies.json not found! Retrying in 5 seconds...")
             time.sleep(5)
@@ -53,18 +66,12 @@ while True:  # Infinite loop
             time.sleep(5)
             continue  
 
-        # Select a random movie
+        # 3️⃣ Select and play a random movie WITH overlay
         movie = random.choice(valid_movies)
         video_url = movie["url"]
         overlay_text = movie["title"].replace(":", "\\:").replace("'", "\\'")  # Escape special characters
 
-        # 1️⃣ Play channel.mp4 first (only if it exists)
-        if os.path.exists(intro_video):
-            print("Playing channel.mp4 before the movie...")
-            stream_video(intro_video, "Welcome to RageTV")
-
-        # 2️⃣ Play the selected movie from movies.json
-        stream_video(video_url, overlay_text)
+        stream_video(video_url, overlay_text)  # With overlay
 
     except Exception as e:
         print(f"Error: {e}")
