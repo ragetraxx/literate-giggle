@@ -37,7 +37,7 @@ def stream_video(video_url, overlay_text=None):
     print(f"Streaming: {video_url} (Overlay: {'Yes' if overlay_text else 'No'})")
     
     process = subprocess.Popen(command, shell=True)
-    process.wait()
+    process.wait()  # Wait for FFmpeg to finish before continuing
 
 while True:  # Main infinite loop
     try:
@@ -63,14 +63,14 @@ while True:  # Main infinite loop
             time.sleep(5)
             continue  
 
-        # 3️⃣ Play movies continuously (WITH overlay)
+        # 3️⃣ Play movies continuously (RANDOM ORDER)
         while True:
-            for movie in valid_movies:  # Play all movies in order
-                video_url = movie["url"]
-                overlay_text = movie["title"].replace(":", "\\:").replace("'", "\\'")  # Escape special characters
+            movie = random.choice(valid_movies)  # Select a random movie
+            video_url = movie["url"]
+            overlay_text = movie["title"].replace(":", "\\:").replace("'", "\\'")  # Escape special characters
 
-                print(f"Playing: {movie['title']} ({video_url})")
-                stream_video(video_url, overlay_text)  # With overlay
+            print(f"Playing: {movie['title']} ({video_url})")
+            stream_video(video_url, overlay_text)  # With overlay
 
     except Exception as e:
         print(f"Error: {e}")
