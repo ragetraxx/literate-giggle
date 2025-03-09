@@ -1,4 +1,4 @@
-name: 24/7 Streaming
+name: 24/7 Radio Stream
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
   workflow_dispatch:
   schedule:
-    - cron: "*/10 * * * *"  # Runs every 10 minutes to ensure it's active
+    - cron: "*/10 * * * *"  # Runs every 10 minutes to keep stream active
 
 jobs:
   stream:
@@ -28,7 +28,7 @@ jobs:
       - name: Run Stream Script
         run: |
           while true; do
-            echo "Streaming to RTMP at $(date)"
+            echo "Streaming radio to RTMP at $(date)"
             python stream.py || echo "Script crashed. Restarting..."
             sleep 3
           done
