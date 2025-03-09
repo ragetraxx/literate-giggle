@@ -3,7 +3,7 @@ name: Video Stream
 on:
   push:
     branches:
-      - main  # Runs the workflow when code is pushed to 'main'
+      - main  # Runs when code is pushed to 'main'
   workflow_dispatch:  # Allows manual triggering
   schedule:
     - cron: "*/10 * * * *"  # Runs every 10 minutes to ensure it's active
@@ -23,7 +23,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install ffmpeg-python
+          pip install -r requirements.txt || echo "No requirements.txt found"
           sudo apt-get update && sudo apt-get install -y ffmpeg
 
       - name: Run Stream Script
