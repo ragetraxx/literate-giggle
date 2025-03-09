@@ -3,8 +3,8 @@ import shlex
 import subprocess
 import time
 
-# RTMP Server URL
-rtmp_url = "rtmp://ragetv:Blaze1110@ssh101.gia.tv/giatv-ragetv/ragetv"
+# Get RTMP URL from environment variables
+rtmp_url = os.getenv("RTMP_URL", "rtmp://ragetv:Blaze1110@ssh101.gia.tv/giatv-ragetv/ragetv")
 
 # Audio Stream URL (Zeno.fm)
 stream_url = "https://stream.zeno.fm/q1n2wyfs7x8uv"
@@ -17,8 +17,8 @@ def stream_audio():
     stream_escaped = shlex.quote(stream_url)
     overlay_escaped = shlex.quote(overlay_path)
 
-    # Add headers to pretend FFmpeg is a web browser
-    headers = "-headers 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)'"
+    # Properly formatted User-Agent header
+    headers = "-user_agent 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'"
 
     command = f"""
     ffmpeg -re -loop 1 -i {overlay_escaped} {headers} -i {stream_escaped} \
@@ -29,10 +29,11 @@ def stream_audio():
     print(f"Streaming: {stream_url} → {rtmp_url}")
 
     while True:
-        process = subprocess.Popen(command, shell=True)
-        process.wait()
-        print("FFmpeg stopped. Restarting stream...")
-        time.sleep(2)  # Prevent fast loop crashes
+        try:
+            subprocess.run(command, shell=True, check=True)
+        except subprocess.CalledProcessError as e:
+            print(f"FFmpeg crashed: {e}. Restarting stream in 2 seconds...")
+            time.sleep(2)  # Prevents fast loop crashes
 
 if __name__ == "__main__":
     stream_audio()
