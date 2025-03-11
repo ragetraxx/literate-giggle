@@ -3,16 +3,21 @@ name: Video Stream
 on:
   push:
     branches:
-      - main  # Runs the workflow when code is pushed to 'main'
+      - main  # Runs when pushing to 'main'
+  schedule:
+    - cron: "0 */5 * * *"  # Runs every 5 hours
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
   stream:
-    runs-on: ubuntu-latest  # Runs on a Linux environment
+    runs-on: ubuntu-latest
+    concurrency:
+      group: video-stream  # Ensures only one instance runs at a time
+      cancel-in-progress: true  # Cancels the previous run before starting a new one
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set Up Python
         uses: actions/setup-python@v4
