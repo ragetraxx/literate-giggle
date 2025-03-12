@@ -4,16 +4,14 @@ on:
   push:
     branches:
       - main
-  schedule:
-    - cron: "0 */5 * * *"
-  workflow_dispatch:
+  workflow_dispatch:  # Allow manual start
 
 jobs:
   stream:
     runs-on: ubuntu-latest
     concurrency:
       group: video-stream
-      cancel-in-progress: true
+      cancel-in-progress: false  # Avoid interrupting an ongoing stream
 
     steps:
       - name: Checkout Repository
@@ -30,4 +28,8 @@ jobs:
           sudo apt-get update && sudo apt-get install -y ffmpeg
 
       - name: Run Stream Script
-        run: python stream.py
+        run: |
+          while true; do
+            python stream.py || echo "Stream crashed. Restarting..."
+            sleep 10  # Avoid instant restart loops
+          done
