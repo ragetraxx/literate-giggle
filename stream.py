@@ -13,6 +13,7 @@ overlay_path = "overlay.png"
 # Files to track progress
 index_file = "last_movie_index.txt"
 played_movies_file = "played_movies.txt"
+timestamp_file = "last_movie_timestamp.txt"
 
 # Function to load movies
 def load_movies():
@@ -60,6 +61,21 @@ def save_played_movie(title):
     with open(played_movies_file, "a") as file:
         file.write(title + "\n")
 
+# Function to get the last movie timestamp
+def get_last_movie_timestamp():
+    if os.path.exists(timestamp_file):
+        try:
+            with open(timestamp_file, "r") as file:
+                return float(file.read().strip())
+        except:
+            return 0
+    return 0
+
+# Function to save the last movie timestamp
+def save_last_movie_timestamp():
+    with open(timestamp_file, "w") as file:
+        file.write(str(time.time()))
+
 while True:
     try:
         movies = load_movies()
@@ -77,8 +93,17 @@ while True:
                 file.write("")
             available_movies = movies
 
-        # Select a random movie from unplayed movies
-        movie = random.choice(available_movies)
+        # Check if last movie was interrupted and should be resumed
+        last_index = get_last_movie_index()
+        last_timestamp = get_last_movie_timestamp()
+        elapsed_time = time.time() - last_timestamp
+
+        if last_index < len(movies):
+            movie = movies[last_index]  # Resume last movie
+            print(f"Resuming movie: {movie['title']}")
+        else:
+            movie = random.choice(available_movies)  # Pick a new random movie
+
         video_url = movie["url"]
         overlay_text = movie["title"].replace(":", "\\:").replace("'", "\\'")
 
@@ -99,6 +124,7 @@ while True:
         # Save progress
         save_last_movie_index(movies.index(movie))
         save_played_movie(movie["title"])
+        save_last_movie_timestamp()
 
         # Run FFmpeg streaming
         os.system(command)
