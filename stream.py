@@ -5,7 +5,7 @@ import time
 import shlex
 
 # RTMP server
-rtmp_url = "rtmp://ssh101.bozztv.com:1935/ssh101/ragetv"
+rtmp_url = "rtmp://ragetv:Blaze1110@ssh101.gia.tv/giatv-ragetv/ragetv"
 
 # Overlay image
 overlay_path = "overlay.png"
