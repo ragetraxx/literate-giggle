@@ -30,17 +30,23 @@ def load_movies():
 def load_played_movies():
     """Load played movies from JSON file."""
     if os.path.exists(LAST_PLAYED_FILE):
-        with open(LAST_PLAYED_FILE, "r") as f:
-            try:
+        try:
+            with open(LAST_PLAYED_FILE, "r") as f:
                 return json.load(f).get("played", [])
-            except json.JSONDecodeError:
-                return []
+        except (json.JSONDecodeError, OSError):
+            print("⚠️ ERROR: last_played.json is corrupt! Resetting file.")
+            save_played_movies([])  # Reset the file
     return []
 
 def save_played_movies(played_movies):
-    """Save played movies to JSON file."""
-    with open(LAST_PLAYED_FILE, "w") as f:
-        json.dump({"played": played_movies}, f)
+    """Save played movies to JSON file safely."""
+    try:
+        with open(LAST_PLAYED_FILE, "w") as f:
+            json.dump({"played": played_movies}, f, indent=4)
+            f.flush()  # Force writing data immediately
+        print(f"✅ Saved played movies: {played_movies}")  # Debugging
+    except Exception as e:
+        print(f"❌ ERROR: Failed to save played movies! {e}")
 
 def stream_movie(movie):
     """Stream a single movie using FFmpeg."""
@@ -123,9 +129,10 @@ def main():
             # Shuffle and play unplayed movies
             random.shuffle(unplayed_movies)
             for movie in unplayed_movies:
-                stream_movie(movie)
-                played_movies.append(movie["title"])
-                save_played_movies(played_movies)  # Save progress after each movie
+                played_movies.append(movie["title"])  # Save before streaming
+                save_played_movies(played_movies)    # Save immediately
+
+                stream_movie(movie)  # Now stream the movie
 
             print("🔄 Restarting after finishing all available movies...")
 
