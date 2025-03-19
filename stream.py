@@ -7,9 +7,13 @@ import random
 
 MOVIE_FILE = "movies.json"
 LAST_PLAYED_FILE = "last_played.json"
-RTMP_URL = "rtmp://ragetv:Blaze1110@ssh101.gia.tv/giatv-ragetv/ragetv"
+RTMP_URL = os.getenv("RTMP_URL")  # Load RTMP URL from environment variable
 OVERLAY = "overlay.png"
 MAX_RETRIES = 3  # Maximum retry attempts if no movies are found
+
+if not RTMP_URL:
+    print("❌ ERROR: RTMP_URL environment variable is not set!")
+    exit(1)
 
 def load_movies():
     """Load movies from JSON file."""
@@ -30,23 +34,17 @@ def load_movies():
 def load_played_movies():
     """Load played movies from JSON file."""
     if os.path.exists(LAST_PLAYED_FILE):
-        try:
-            with open(LAST_PLAYED_FILE, "r") as f:
+        with open(LAST_PLAYED_FILE, "r") as f:
+            try:
                 return json.load(f).get("played", [])
-        except (json.JSONDecodeError, OSError):
-            print("⚠️ ERROR: last_played.json is corrupt! Resetting file.")
-            save_played_movies([])  # Reset the file
+            except json.JSONDecodeError:
+                return []
     return []
 
 def save_played_movies(played_movies):
-    """Save played movies to JSON file safely."""
-    try:
-        with open(LAST_PLAYED_FILE, "w") as f:
-            json.dump({"played": played_movies}, f, indent=4)
-            f.flush()  # Force writing data immediately
-        print(f"✅ Saved played movies: {played_movies}")  # Debugging
-    except Exception as e:
-        print(f"❌ ERROR: Failed to save played movies! {e}")
+    """Save played movies to JSON file."""
+    with open(LAST_PLAYED_FILE, "w") as f:
+        json.dump({"played": played_movies}, f, indent=4)
 
 def stream_movie(movie):
     """Stream a single movie using FFmpeg."""
@@ -90,6 +88,11 @@ def stream_movie(movie):
     ]
 
     print(f"🎬 Now Streaming: {title}")
+
+    # Save the currently playing movie
+    with open(LAST_PLAYED_FILE, "w") as f:
+        json.dump({"played": [title]}, f, indent=4)
+
     subprocess.run(command)
 
 def main():
@@ -129,10 +132,9 @@ def main():
             # Shuffle and play unplayed movies
             random.shuffle(unplayed_movies)
             for movie in unplayed_movies:
-                played_movies.append(movie["title"])  # Save before streaming
-                save_played_movies(played_movies)    # Save immediately
-
-                stream_movie(movie)  # Now stream the movie
+                stream_movie(movie)
+                played_movies.append(movie["title"])
+                save_played_movies(played_movies)  # Save progress after each movie
 
             print("🔄 Restarting after finishing all available movies...")
 
