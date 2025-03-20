@@ -6,7 +6,7 @@ on:
       - main
   schedule:
     - cron: "0 */6 * * *"  # Runs every 6 hours
-  workflow_dispatch:  # Allows manual trigger
+  workflow_dispatch:
 
 jobs:
   update-and-deploy:
@@ -27,7 +27,7 @@ jobs:
         run: pip install pyyaml
 
       - name: Run Script (play.py)
-        run: python play.py
+        run: python3 play.py
 
       - name: Commit and Push Changes
         run: |
@@ -37,18 +37,27 @@ jobs:
           git diff --staged --quiet || git commit -m "Updated play.json with new movies"
           git push
 
+      - name: Pull Latest Changes
+        run: git pull origin main
+
       - name: Install FFmpeg
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg
 
-      - name: Create environment file
+      - name: Debug Secrets
         run: |
-          echo "RTMP_URL=${{ secrets.RTMP_URL }}" > .env
+          echo "Checking if RTMP_URL is set..."
+          if [ -z "$RTMP_URL" ]; then
+            echo "RTMP_URL is NOT set!"
+            exit 1
+          else
+            echo "RTMP_URL is set."
+          fi
+        env:
+          RTMP_URL: ${{ secrets.RTMP_URL }}
 
       - name: Run live stream script (stream.py)
-        run: |
-          export $(grep -v '^#' .env | xargs)  # Load environment variables
-          nohup python3 stream.py > stream.log 2>&1 &
-          echo "Stream started at $(date)" >> stream.log
-          sleep 21500  # ~6 hours to match the schedule
+        env:
+          RTMP_URL: ${{ secrets.RTMP_URL }}
+        run: python3 stream.py
