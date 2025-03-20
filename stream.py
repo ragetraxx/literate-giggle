@@ -9,7 +9,7 @@ RTMP_URL = os.getenv("RTMP_URL")  # ✅ Get RTMP_URL from environment
 OVERLAY = "overlay.png"
 MAX_RETRIES = 3  # Maximum retry attempts if no movies are found
 
-# ✅ Check if RTMP_URL is set
+# ✅ Ensure RTMP_URL is set
 if not RTMP_URL:
     print("❌ ERROR: RTMP_URL environment variable is NOT set! Check GitHub Secrets.")
     exit(1)
@@ -80,7 +80,7 @@ def stream_movie(movie):
 
     try:
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        
+
         # ✅ Print FFmpeg logs in real-time
         for line in process.stderr:
             print(line, end="")
