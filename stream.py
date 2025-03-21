@@ -2,15 +2,22 @@ import os
 import json
 import subprocess
 import time
+import shutil
 
 PLAY_FILE = "play.json"
 RTMP_URL = os.getenv("RTMP_URL")  # ✅ Get RTMP_URL from environment
 OVERLAY = "overlay.png"
 MAX_RETRIES = 3  # Maximum retry attempts if no movies are found
+FFMPEG_LOG_FILE = "ffmpeg.log"  # Log FFmpeg output
 
 # ✅ Ensure RTMP_URL is set
 if not RTMP_URL:
     print("❌ ERROR: RTMP_URL environment variable is NOT set! Check GitHub Secrets.")
+    exit(1)
+
+# ✅ Ensure FFmpeg is installed
+if not shutil.which("ffmpeg"):
+    print("❌ ERROR: FFmpeg is not installed or not in PATH!")
     exit(1)
 
 # ✅ Ensure required files exist
@@ -78,13 +85,17 @@ def stream_movie(movie):
     print("Executing FFmpeg command:", " ".join(command))
 
     try:
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
-        # ✅ Print FFmpeg logs in real-time
-        for line in process.stderr:
-            print(line, end="")
+        with open(FFMPEG_LOG_FILE, "w") as log_file:
+            process = subprocess.Popen(
+                command, stdout=log_file, stderr=subprocess.STDOUT, text=True
+            )
 
         process.wait()
+
+        if process.returncode != 0:
+            print(f"❌ ERROR: FFmpeg exited with error code {process.returncode} for '{title}'")
+            print(f"📝 Check '{FFMPEG_LOG_FILE}' for details.")
+
     except Exception as e:
         print(f"❌ ERROR: FFmpeg failed for '{title}' - {str(e)}")
 
