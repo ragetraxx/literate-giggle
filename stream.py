@@ -30,14 +30,14 @@ if not os.path.exists(OVERLAY):
     exit(1)
 
 def load_movies():
-    """Load movies from play.json."""
+    """Load movies from play.json in their original order."""
     try:
         with open(PLAY_FILE, "r") as f:
             movies = json.load(f)
             if not movies:
                 print("❌ ERROR: play.json is empty!")
                 return []
-            return movies
+            return list(movies)  # ✅ Ensure it's a list and preserves order
     except json.JSONDecodeError:
         print("❌ ERROR: Failed to parse play.json! Check for syntax errors.")
         return []
