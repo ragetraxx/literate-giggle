@@ -1,7 +1,6 @@
 import os
 import json
 import subprocess
-import random
 import time
 
 PLAY_FILE = "play.json"
@@ -90,7 +89,7 @@ def stream_movie(movie):
         print(f"❌ ERROR: FFmpeg failed for '{title}' - {str(e)}")
 
 def main():
-    """Main function to randomly pick and stream movies one after another."""
+    """Main function to play all movies sequentially."""
     retry_attempts = 0
 
     while retry_attempts < MAX_RETRIES:
@@ -104,24 +103,13 @@ def main():
 
         retry_attempts = 0  # Reset retry counter on success
 
-        # ✅ Keep track of played movies to avoid repeats
-        played_movies = set()
-
         while True:
-            available_movies = [m for m in movies if m["title"] not in played_movies]
+            for movie in movies:
+                stream_movie(movie)
+                print("🔄 Movie ended. Playing next movie...")
+                time.sleep(10)  # Short pause before starting the next movie
 
-            if not available_movies:
-                print("🔄 All movies played, restarting the list...")
-                played_movies.clear()
-                available_movies = movies
-
-            movie = random.choice(available_movies)  # ✅ Pick a new random movie
-            played_movies.add(movie["title"])
-
-            stream_movie(movie)
-
-            print("🔄 Movie ended. Picking a new random movie...")
-            time.sleep(10)  # Short pause before starting the next movie
+            print("🔄 All movies played, restarting from the beginning...")
 
     print("❌ ERROR: Maximum retry attempts reached. Exiting.")
 
