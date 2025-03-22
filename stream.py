@@ -47,35 +47,35 @@ def stream_movie(movie):
     overlay_text = title.replace(":", r"\:").replace("'", r"\'").replace('"', r'\"')
 
     command = [
-    "ffmpeg",
-    "-re",
-    "-fflags", "+genpts",
-    "-rtbufsize", "16M",  # Reduce buffer size for less delay
-    "-probesize", "500K",  # Reduce probe size to start faster
-    "-analyzeduration", "250000",  # Reduce analysis time
-    "-i", url,
-    "-i", OVERLAY,
-    "-filter_complex",
-    f"[0:v][1:v]scale2ref[v0][v1];[v0][v1]overlay=0:0,"
-    f"drawtext=text='{overlay_text}':fontcolor=white:fontsize=24:x=20:y=20",
-    "-c:v", "libx264",
-    "-profile:v", "high",
-    "-level", "4.2",
-    "-preset", "medium",  # Better balance of quality and speed
-    "-tune", "film",
-    "-b:v", "5000k",  # Increase bitrate for better quality
-    "-crf", "20",  # Lower CRF for less blur
-    "-maxrate", "5500k",  # Allow higher peaks
-    "-bufsize", "4000k",  # Reduce buffer to avoid lag
-    "-pix_fmt", "yuv420p",
-    "-g", "50",
-    "-c:a", "aac",
-    "-b:a", "192k",
-    "-ar", "48000",
-    "-movflags", "+faststart",
-    "-f", "flv",
-    RTMP_URL
-    ] 
+        "ffmpeg",
+        "-re",
+        "-fflags", "+genpts",
+        "-rtbufsize", "8M",  # Reduce buffer size for less delay
+        "-probesize", "1M",  # Ensures faster stream start
+        "-analyzeduration", "500000",  # Improves stream detection
+        "-i", url,
+        "-i", OVERLAY,
+        "-filter_complex",
+        f"[0:v][1:v]scale2ref[v0][v1];[v0][v1]overlay=0:0,"
+        f"drawtext=text='{overlay_text}':fontcolor=white:fontsize=24:x=20:y=20",
+        "-c:v", "libx264",
+        "-profile:v", "high",
+        "-level", "4.2",
+        "-preset", "slow",  # Better compression & quality
+        "-tune", "film",
+        "-b:v", "6000k",  # Higher bitrate for sharper image
+        "-crf", "18",  # Lower CRF for less blur
+        "-maxrate", "7000k",  # Allows higher peaks
+        "-bufsize", "5000k",  # Adjusted buffer size for stability
+        "-pix_fmt", "yuv420p",
+        "-g", "100",  # Larger GOP for better motion handling
+        "-c:a", "aac",
+        "-b:a", "256k",  # Higher audio bitrate for better clarity
+        "-ar", "48000",
+        "-movflags", "+faststart",
+        "-f", "flv",
+        RTMP_URL
+    ]
 
     print(f"🎬 Now Streaming: {title}")
     print("Executing FFmpeg command:", " ".join(command))
