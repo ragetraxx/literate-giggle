@@ -58,24 +58,20 @@ def stream_movie(movie):
         "-filter_complex",
         f"[0:v][1:v]scale2ref[v0][v1];[v0][v1]overlay=0:0,"
         f"drawtext=text='{overlay_text}':fontcolor=white:fontsize=24:x=20:y=20",
-        "-map", "0:v",  # Ensure video is mapped
-        "-map", "0:a?",  # Map audio only if it exists
         "-c:v", "libx264",
         "-profile:v", "high",
-        "-level", "5.2",
-        "-preset", "faster",
-        "-tune", "film",
-        "-b:v", "10000k",
-        "-crf", "16",
-        "-maxrate", "12000k",
-        "-bufsize", "6000k",
+        "-level", "5.2",  # Supports SD to 4K
+        "-preset", "faster",  # Lower latency than "slow"
+        "-tune", "film",  # Better sharpness & motion handling
+        "-b:v", "10000k",  # Higher bitrate for better quality
+        "-crf", "16",  # Lower CRF for less blur
+        "-maxrate", "12000k",  # Allows higher peaks
+        "-bufsize", "6000k",  # Reduces buffering lag
         "-pix_fmt", "yuv420p",
-        "-g", "50",
+        "-g", "50",  # Lower GOP for better real-time performance
         "-c:a", "aac",
-        "-b:a", "320k",
-        "-ar", "48000",
-        "-ac", "2",
-        "-af", "volume=3.0",  # ✅ Boost low audio volume
+        "-b:a", "320k",  # Higher audio bitrate for better clarity
+        "-ar", "48000",  # ✅ Keep high-quality audio but remove forced stereo
         "-movflags", "+faststart",
         "-f", "flv",
         RTMP_URL
