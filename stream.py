@@ -75,9 +75,7 @@ def stream_movie(movie):
     "-movflags", "+faststart",
     "-f", "flv",
     RTMP_URL
-    ]
-        RTMP_URL
-    ]
+    ] 
 
     print(f"🎬 Now Streaming: {title}")
     print("Executing FFmpeg command:", " ".join(command))
