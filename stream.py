@@ -50,9 +50,9 @@ def stream_movie(movie):
         "ffmpeg",
         "-re",
         "-fflags", "+genpts",
-        "-rtbufsize", "4M",  # Reduce buffer size for less delay
-        "-probesize", "500K",  # Faster stream detection
-        "-analyzeduration", "250000",  # Reduced analysis time
+        "-rtbufsize", "4M",
+        "-probesize", "50M",  # Increase detection time
+        "-analyzeduration", "50M",
         "-i", url,
         "-i", OVERLAY,
         "-filter_complex",
@@ -60,18 +60,19 @@ def stream_movie(movie):
         f"drawtext=text='{overlay_text}':fontcolor=white:fontsize=24:x=20:y=20",
         "-c:v", "libx264",
         "-profile:v", "high",
-        "-level", "5.2",  # Supports SD to 4K
-        "-preset", "faster",  # Lower latency than "slow"
-        "-tune", "film",  # Better sharpness & motion handling
-        "-b:v", "10000k",  # Higher bitrate for better quality
-        "-crf", "16",  # Lower CRF for less blur
-        "-maxrate", "12000k",  # Allows higher peaks
-        "-bufsize", "6000k",  # Reduces buffering lag
+        "-level", "5.2",
+        "-preset", "faster",
+        "-tune", "film",
+        "-b:v", "10000k",
+        "-crf", "16",
+        "-maxrate", "12000k",
+        "-bufsize", "6000k",
         "-pix_fmt", "yuv420p",
-        "-g", "50",  # Lower GOP for better real-time performance
-        "-c:a", "aac",
-        "-b:a", "320k",  # Higher audio bitrate for better clarity
-        "-ar", "48000",  # ✅ Keep high-quality audio but remove forced stereo
+        "-g", "50",
+        "-map", "0:a:0",  # Select the first audio track
+        "-c:a", "aac",  # Ensure audio encoding
+        "-b:a", "320k",
+        "-ar", "48000",
         "-movflags", "+faststart",
         "-f", "flv",
         RTMP_URL
