@@ -61,20 +61,19 @@ def stream_movie(movie):
         "-c:v", "libx264",
         "-preset", "faster",  # ✅ Balanced quality & speed
         "-tune", "film",  # ✅ Improves sharpness
-        "-crf", "18",  # ✅ Constant Rate Factor (better quality, lower bitrate)
+        "-crf", "18",  # ✅ Adaptive quality (better than fixed bitrate)
         "-maxrate", "8000k",  # ✅ Limits bitrate spikes
         "-bufsize", "4000k",  # ✅ Reduces buffering
         "-pix_fmt", "yuv420p",
-        "-g", "48",  # ✅ Improves smoothness (closer keyframe interval)
-        "-sc_threshold", "0",  # ✅ Prevents sudden quality drops
-        "-map", "0:a?",  # ✅ Selects the best available audio track
+        "-g", "48",  # ✅ Smoother playback
+        "-sc_threshold", "0",  # ✅ Prevents quality drops
         "-c:a", "aac",  # ✅ Ensures audio encoding
         "-b:a", "256k",  # ✅ High-quality audio
         "-ar", "48000",
         "-movflags", "+faststart",
         "-f", "flv",
         RTMP_URL,
-        "-loglevel", "error",  # ✅ Suppress unnecessary logs
+        "-loglevel", "error",  # ✅ Show only errors
     ]
 
     print(f"🎬 Now Streaming: {title}")
