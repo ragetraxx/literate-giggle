@@ -4,9 +4,9 @@ import subprocess
 import time
 
 PLAY_FILE = "play.json"
-RTMP_URL = os.getenv("RTMP_URL")  # ✅ Get RTMP_URL from environment
+RTMP_URL = os.getenv("RTMP_URL")  # ✅ Get RTMP_URL from GitHub Secret
 OVERLAY = "overlay.png"
-MAX_RETRIES = 3  # Maximum retry attempts if no movies are found
+MAX_RETRIES = 3  # Retry attempts if no movies are found
 
 # ✅ Check if RTMP_URL is set
 if not RTMP_URL:
@@ -50,32 +50,31 @@ def stream_movie(movie):
         "ffmpeg",
         "-re",
         "-fflags", "+genpts",
-        "-rtbufsize", "4M",
-        "-probesize", "50M",  # Increase detection time
-        "-analyzeduration", "50M",
+        "-rtbufsize", "2M",
+        "-probesize", "32M",
+        "-analyzeduration", "32M",
         "-i", url,
         "-i", OVERLAY,
         "-filter_complex",
         f"[0:v][1:v]scale2ref[v0][v1];[v0][v1]overlay=0:0,"
-        f"drawtext=text='{overlay_text}':fontcolor=white:fontsize=24:x=20:y=20",
+        f"drawtext=text='{overlay_text}':fontcolor=white:fontsize=28:x=20:y=20",
         "-c:v", "libx264",
-        "-profile:v", "high",
-        "-level", "5.2",
-        "-preset", "faster",
-        "-tune", "film",
-        "-b:v", "10000k",
-        "-crf", "16",
-        "-maxrate", "12000k",
-        "-bufsize", "6000k",
+        "-preset", "faster",  # ✅ Balanced quality & speed
+        "-tune", "film",  # ✅ Improves sharpness
+        "-crf", "18",  # ✅ Constant Rate Factor (better quality, lower bitrate)
+        "-maxrate", "8000k",  # ✅ Limits bitrate spikes
+        "-bufsize", "4000k",  # ✅ Reduces buffering
         "-pix_fmt", "yuv420p",
-        "-g", "50",
-        "-map", "0:a:0",  # Select the first audio track
-        "-c:a", "aac",  # Ensure audio encoding
-        "-b:a", "320k",
+        "-g", "48",  # ✅ Improves smoothness (closer keyframe interval)
+        "-sc_threshold", "0",  # ✅ Prevents sudden quality drops
+        "-map", "0:a?",  # ✅ Selects the best available audio track
+        "-c:a", "aac",  # ✅ Ensures audio encoding
+        "-b:a", "256k",  # ✅ High-quality audio
         "-ar", "48000",
         "-movflags", "+faststart",
         "-f", "flv",
-        RTMP_URL
+        RTMP_URL,
+        "-loglevel", "error",  # ✅ Suppress unnecessary logs
     ]
 
     print(f"🎬 Now Streaming: {title}")
