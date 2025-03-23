@@ -50,30 +50,31 @@ def stream_movie(movie):
         "ffmpeg",
         "-re",
         "-fflags", "+genpts",
-        "-rtbufsize", "2M",
-        "-probesize", "32M",
-        "-analyzeduration", "32M",
+        "-rtbufsize", "8M",  # ✅ Increased to reduce buffering
+        "-probesize", "64M",
+        "-analyzeduration", "64M",
         "-i", url,
         "-i", OVERLAY,
         "-filter_complex",
         f"[0:v][1:v]scale2ref[v0][v1];[v0][v1]overlay=0:0,"
         f"drawtext=text='{overlay_text}':fontcolor=white:fontsize=28:x=20:y=20",
         "-c:v", "libx264",
-        "-preset", "faster",  # ✅ Balanced quality & speed
-        "-tune", "film",  # ✅ Improves sharpness
-        "-crf", "18",  # ✅ Adaptive quality (better than fixed bitrate)
-        "-maxrate", "8000k",  # ✅ Limits bitrate spikes
-        "-bufsize", "4000k",  # ✅ Reduces buffering
+        "-preset", "superfast",  # ✅ Lower CPU usage, faster encoding
+        "-tune", "zerolatency",  # ✅ Reduces lag
+        "-crf", "23",  # ✅ Lower quality slightly to avoid buffering
+        "-maxrate", "5000k",  # ✅ Lower bitrate to match upload speed
+        "-bufsize", "8000k",  # ✅ Increased buffer size for smoother playback
         "-pix_fmt", "yuv420p",
-        "-g", "48",  # ✅ Smoother playback
-        "-sc_threshold", "0",  # ✅ Prevents quality drops
-        "-c:a", "aac",  # ✅ Ensures audio encoding
-        "-b:a", "256k",  # ✅ High-quality audio
-        "-ar", "48000",
+        "-g", "60",  # ✅ Better keyframe spacing
+        "-sc_threshold", "0",
+        "-r", "30",  # ✅ Force constant frame rate for stability
+        "-c:a", "aac",
+        "-b:a", "128k",  # ✅ Lower audio bitrate to free up bandwidth
+        "-ar", "44100",  # ✅ Ensures compatibility
         "-movflags", "+faststart",
         "-f", "flv",
         RTMP_URL,
-        "-loglevel", "error",  # ✅ Show only errors
+        "-loglevel", "warning",  # ✅ Show only important logs
     ]
 
     print(f"🎬 Now Streaming: {title}")
@@ -86,7 +87,7 @@ def stream_movie(movie):
         for line in process.stderr:
             print(line, end="")
 
-        process.wait()  # ✅ Ensures that the next movie starts only after the current one ends
+        process.wait()
 
     except Exception as e:
         print(f"❌ ERROR: FFmpeg failed for '{title}' - {str(e)}")
