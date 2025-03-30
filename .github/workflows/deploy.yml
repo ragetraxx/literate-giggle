@@ -27,7 +27,10 @@ jobs:
         run: pip install -r requirements.txt  # Ensure all dependencies are installed
 
       - name: Run Script (play.py)
-        run: python3 play.py
+        run: python3 play.py  # play.json will be updated
+
+      - name: Reset Local Changes Before Pulling
+        run: git reset --hard HEAD
 
       - name: Pull Latest Changes
         run: git pull --rebase origin main
@@ -37,19 +40,22 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add play.json
-          git diff --staged --quiet || git commit -m "Updated play.json with new movies - $(date '+%Y-%m-%d %H:%M:%S')"
+          git commit -m "Updated play.json with new movies - $(date '+%Y-%m-%d %H:%M:%S')" || echo "No changes to commit."
           git push
 
       - name: Install FFmpeg
         run: |
-          apt-get update
-          apt-get install -y ffmpeg
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
 
-      - name: Check Required Secrets
+      - name: Debug Secrets
         run: |
+          echo "Checking if RTMP_URL is set..."
           if [ -z "${{ secrets.RTMP_URL }}" ]; then
-            echo "RTMP_URL secret is missing. Exiting."
+            echo "❌ ERROR: RTMP_URL is NOT set!"
             exit 1
+          else
+            echo "✅ RTMP_URL is set."
           fi
 
       - name: Run live stream script (stream.py)
