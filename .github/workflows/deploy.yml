@@ -29,30 +29,27 @@ jobs:
       - name: Run Script (play.py)
         run: python3 play.py
 
+      - name: Pull Latest Changes
+        run: git pull --rebase origin main
+
       - name: Commit and Push Changes
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add play.json
-          git commit -m "Updated play.json with new movies - $(date '+%Y-%m-%d %H:%M:%S')" --allow-empty
+          git diff --staged --quiet || git commit -m "Updated play.json with new movies - $(date '+%Y-%m-%d %H:%M:%S')"
           git push
-
-      - name: Pull Latest Changes
-        run: git pull --rebase origin main
 
       - name: Install FFmpeg
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
+          apt-get update
+          apt-get install -y ffmpeg
 
-      - name: Debug Secrets
+      - name: Check Required Secrets
         run: |
-          echo "Checking if RTMP_URL is set..."
           if [ -z "${{ secrets.RTMP_URL }}" ]; then
-            echo "❌ ERROR: RTMP_URL is NOT set!"
+            echo "RTMP_URL secret is missing. Exiting."
             exit 1
-          else
-            echo "✅ RTMP_URL is set."
           fi
 
       - name: Run live stream script (stream.py)
