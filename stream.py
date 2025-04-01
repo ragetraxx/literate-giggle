@@ -49,33 +49,33 @@ def stream_movie(movie):
     overlay_text = title.replace(":", r"\:").replace("'", r"\'").replace('"', r'\"')
 
     command = [
-    "ffmpeg",
-    "-re",
-    "-fflags", "+genpts",
-    "-rtbufsize", "4M",  # 🔹 Further reduced for less buffering
-    "-probesize", "16M",  # 🔹 Reduce analysis delay
-    "-analyzeduration", "16M",
-    "-i", url,
-    "-i", OVERLAY,
-    "-filter_complex",
-    "[0:v][1:v]scale2ref[v0][v1];[v0][v1]overlay=0:0,"
-    f"drawtext=text='{overlay_text}':fontcolor=white:fontsize=20:x=30:y=30",
-    "-c:v", "libx264",  # 🔹 Faster encoder for real-time streaming
-    "-preset", "veryfast",  # 🔹 Lower CPU usage
-    "-tune", "zerolatency",  # 🔹 Ensures minimal delay
-    "-crf", "23",  # 🔹 Balanced quality
-    "-b:v", "2500k",
-    "-maxrate", "2800k",  # 🔹 Lower peak bitrate for stability
-    "-bufsize", "1600k",  # 🔹 Reduces buffering delays
-    "-pix_fmt", "yuv420p",
-    "-g", "30",  # 🔹 More frequent keyframes
-    "-r", "30",
-    "-c:a", "aac",
-    "-b:a", "128k",
-    "-ar", "44100",
-    "-f", "flv",
-    RTMP_URL,
-    "-loglevel", "error",
+        "ffmpeg",
+        "-re",
+        "-fflags", "+genpts",
+        "-rtbufsize", "8M",  # ✅ Lower buffer to prevent excess latency
+        "-probesize", "32M",
+        "-analyzeduration", "32M",
+        "-i", url,
+        "-i", OVERLAY,
+        "-filter_complex",
+        "[0:v][1:v]scale2ref[v0][v1];[v0][v1]overlay=0:0,"  # ✅ Correct overlay positioning
+        f"drawtext=text='{overlay_text}':fontcolor=white:fontsize=20:x=30:y=30",
+        "-c:v", "libx264",
+        "-preset", "ultrafast",
+        "-tune", "zerolatency",
+        "-crf", "18",  # ✅ Balanced quality & performance
+        "-maxrate", "5000k",  # ✅ Adjusted for stability
+        "-bufsize", "6000k",  # ✅ Reduced to avoid long buffering
+        "-pix_fmt", "yuv420p",
+        "-g", "60",
+        "-r", "30",
+        "-c:a", "aac",
+        "-b:a", "128k",
+        "-ar", "44100",
+        "-movflags", "+faststart",
+        "-f", "flv",
+        RTMP_URL,
+        "-loglevel", "error",  # ✅ Show only errors, not all logs
     ]
 
     print(f"🎬 Now Streaming: {title}")
