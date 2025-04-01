@@ -49,34 +49,33 @@ def stream_movie(movie):
     overlay_text = title.replace(":", r"\:").replace("'", r"\'").replace('"', r'\"')
 
     command = [
-        "ffmpeg",
-        "-re",
-        "-fflags", "+genpts",
-        "-rtbufsize", "8M",  # ✅ Lower buffer to prevent excess latency
-        "-probesize", "32M",
-        "-analyzeduration", "32M",
-        "-i", url,
-        "-i", OVERLAY,
-        "-filter_complex",
-        "[0:v][1:v]scale2ref[v0][v1];[v0][v1]overlay=0:0,"  # ✅ Correct overlay positioning
-        f"drawtext=text='{overlay_text}':fontcolor=white:fontsize=20:x=30:y=30",
-        "-c:v", "libx265",
-        "-preset", "slow",
-        "-tune", "zerolatency",
-        "-crf", "24",  # ✅ Balanced quality & performance
-        "-b:v", "3000k",
-        "-maxrate", "3500k",  # ✅ Adjusted for stability
-        "-bufsize", "3000k",  # ✅ Reduced to avoid long buffering
-        "-pix_fmt", "yuv420p",
-        "-g", "60",
-        "-r", "30",
-        "-c:a", "aac",
-        "-b:a", "128k",
-        "-ar", "44100",
-        "-movflags", "+faststart",
-        "-f", "flv",
-        RTMP_URL,
-        "-loglevel", "error",  # ✅ Show only errors, not all logs
+    "ffmpeg",
+    "-re",
+    "-fflags", "+genpts",
+    "-rtbufsize", "4M",  # 🔹 Further reduce buffer size
+    "-probesize", "16M",  # 🔹 Reduce analysis delay
+    "-analyzeduration", "16M",
+    "-i", url,
+    "-i", OVERLAY,
+    "-filter_complex",
+    "[0:v][1:v]scale2ref[v0][v1];[v0][v1]overlay=0:0,"
+    f"drawtext=text='{overlay_text}':fontcolor=white:fontsize=20:x=30:y=30",
+    "-c:v", "libx264",  # 🔹 Use x264 for better real-time performance
+    "-preset", "fast",  # 🔹 Faster encoding, lower latency
+    "-tune", "zerolatency",
+    "-crf", "23",  # 🔹 Slightly lower CRF for better quality
+    "-b:v", "3000k",
+    "-maxrate", "3200k",  # 🔹 Reduce peak bitrate for stability
+    "-bufsize", "1600k",  # 🔹 Reduce buffer to avoid long buffering
+    "-pix_fmt", "yuv420p",
+    "-g", "30",  # 🔹 Reduce GOP for smoother streaming
+    "-r", "30",
+    "-c:a", "aac",
+    "-b:a", "128k",
+    "-ar", "44100",
+    "-f", "flv",
+    RTMP_URL,
+    "-loglevel", "error",
     ]
 
     print(f"🎬 Now Streaming: {title}")
