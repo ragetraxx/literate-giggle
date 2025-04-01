@@ -60,10 +60,10 @@ def stream_movie(movie):
         "-filter_complex",
         "[0:v][1:v]scale2ref[v0][v1];[v0][v1]overlay=0:0,"  # ✅ Correct overlay positioning
         f"drawtext=text='{overlay_text}':fontcolor=white:fontsize=20:x=30:y=30",
-        "-c:v", "libx264",
+        "-c:v", "libx265",
         "-preset", "slow",
         "-tune", "zerolatency",
-        "-crf", "18",  # ✅ Balanced quality & performance
+        "-crf", "24",  # ✅ Balanced quality & performance
         "-b:v", "3000k",
         "-maxrate", "3500k",  # ✅ Adjusted for stability
         "-bufsize", "3000k",  # ✅ Reduced to avoid long buffering
