@@ -28,15 +28,15 @@ def stream_movie(movie):
     
     overlay_text = title.replace(":", r"\:").replace("'", r"\'").replace('"', r'\"')
     command = [
-        "ffmpeg", "-re", "-fflags", "+genpts", "-rtbufsize", "4M", "-probesize", "16M", "-analyzeduration", "16M",
-        "-i", url, "-i", OVERLAY, "-filter_complex", 
+        "ffmpeg", "-re", "-fflags", "+genpts", "-rtbufsize", "8M", "-probesize", "500k", "-analyzeduration", "1M",
+        "-i", url, "-re", "-i", OVERLAY, "-filter_complex", 
         f"[0:v][1:v]scale2ref[v0][v1];[v0][v1]overlay=0:0,drawtext=text='{overlay_text}':fontcolor=white:fontsize=20:x=30:y=30",
-        "-c:v", "libx264", "-preset", "ultrafast", "-tune", "zerolatency", "-crf", "18", "-maxrate", "5000k", "-bufsize", "4000k",
-        "-pix_fmt", "yuv420p", "-g", "60", "-r", "30", "-c:a", "aac", "-b:a", "128k", "-ar", "44100", "-movflags", "+faststart", "-f", "flv", RTMP_URL,
+        "-c:v", "libx264", "-preset", "superfast", "-tune", "zerolatency", "-crf", "23", "-maxrate", "3500k", "-bufsize", "6000k",
+        "-pix_fmt", "yuv420p", "-g", "30", "-r", "30", "-c:a", "aac", "-b:a", "128k", "-ar", "44100", "-movflags", "+faststart", "-f", "flv", RTMP_URL,
         "-loglevel", "error"
     ]
     print(f"🎬 Streaming: {title}")
-    subprocess.run(command, text=True, stderr=subprocess.PIPE)
+    subprocess.Popen(command, text=True, stderr=subprocess.PIPE)  # Run asynchronously
 
 def main():
     retries = 0
@@ -51,6 +51,7 @@ def main():
         while True:
             for movie in movies:
                 stream_movie(movie)
+                time.sleep(2)  # Prevents overlapping issues
                 print("🔄 Next movie...")
             print("🔄 Restarting playlist...")
     print("❌ ERROR: Max retries reached. Exiting.")
