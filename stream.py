@@ -52,7 +52,7 @@ def stream_movie(movie):
     "ffmpeg",
     "-re",
     "-fflags", "+genpts",
-    "-rtbufsize", "4M",  # 🔹 Further reduce buffer size
+    "-rtbufsize", "4M",  # 🔹 Further reduced for less buffering
     "-probesize", "16M",  # 🔹 Reduce analysis delay
     "-analyzeduration", "16M",
     "-i", url,
@@ -60,15 +60,15 @@ def stream_movie(movie):
     "-filter_complex",
     "[0:v][1:v]scale2ref[v0][v1];[v0][v1]overlay=0:0,"
     f"drawtext=text='{overlay_text}':fontcolor=white:fontsize=20:x=30:y=30",
-    "-c:v", "libx264",  # 🔹 Use x264 for better real-time performance
-    "-preset", "fast",  # 🔹 Faster encoding, lower latency
-    "-tune", "zerolatency",
-    "-crf", "23",  # 🔹 Slightly lower CRF for better quality
-    "-b:v", "3000k",
-    "-maxrate", "3200k",  # 🔹 Reduce peak bitrate for stability
-    "-bufsize", "1600k",  # 🔹 Reduce buffer to avoid long buffering
+    "-c:v", "libx264",  # 🔹 Faster encoder for real-time streaming
+    "-preset", "veryfast",  # 🔹 Lower CPU usage
+    "-tune", "zerolatency",  # 🔹 Ensures minimal delay
+    "-crf", "23",  # 🔹 Balanced quality
+    "-b:v", "2500k",
+    "-maxrate", "2800k",  # 🔹 Lower peak bitrate for stability
+    "-bufsize", "1600k",  # 🔹 Reduces buffering delays
     "-pix_fmt", "yuv420p",
-    "-g", "30",  # 🔹 Reduce GOP for smoother streaming
+    "-g", "30",  # 🔹 More frequent keyframes
     "-r", "30",
     "-c:a", "aac",
     "-b:a", "128k",
