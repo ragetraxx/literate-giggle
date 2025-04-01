@@ -36,7 +36,7 @@ def load_movies():
         return []
 
 def stream_movie(movie):
-    """Stream a single movie with reduced buffering."""
+    """Stream a single movie with even lower buffering."""
     title = movie.get("title", "Unknown Title")
     url = movie.get("url")
 
@@ -50,9 +50,9 @@ def stream_movie(movie):
         "ffmpeg",
         "-re",
         "-fflags", "+genpts",
-        "-rtbufsize", "4M",  # ✅ Lower buffer for less latency
-        "-probesize", "16M",  # ✅ Faster start
-        "-analyzeduration", "16M",
+        "-rtbufsize", "2M",  # ✅ Further lower buffer for minimal latency
+        "-probesize", "8M",  # ✅ Faster start
+        "-analyzeduration", "8M",
         "-i", url,
         "-i", OVERLAY,
         "-filter_complex",
@@ -62,13 +62,13 @@ def stream_movie(movie):
         "-preset", "ultrafast",
         "-tune", "zerolatency",
         "-crf", "18",
-        "-maxrate", "5000k",
-        "-bufsize", "4000k",  # ✅ Further reduced buffer
+        "-maxrate", "4000k",
+        "-bufsize", "3000k",  # ✅ Reduced buffer further
         "-pix_fmt", "yuv420p",
-        "-g", "60",
-        "-r", "30",
+        "-g", "48",  # ✅ Lower keyframe interval for smoother streaming
+        "-r", "25",
         "-c:a", "aac",
-        "-b:a", "128k",
+        "-b:a", "96k",
         "-ar", "44100",
         "-movflags", "+faststart",
         "-f", "flv",
