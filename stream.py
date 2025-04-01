@@ -64,9 +64,9 @@ def stream_movie(movie):
         "-preset", "slow",
         "-tune", "zerolatency",
         "-crf", "18",  # ✅ Balanced quality & performance
-        "-b:v", "6000k",
-        "-maxrate", "7000k",  # ✅ Adjusted for stability
-        "-bufsize", "2000k",  # ✅ Reduced to avoid long buffering
+        "-b:v", "4000k",
+        "-maxrate", "4500k",  # ✅ Adjusted for stability
+        "-bufsize", "3000k",  # ✅ Reduced to avoid long buffering
         "-pix_fmt", "yuv420p",
         "-g", "60",
         "-r", "30",
