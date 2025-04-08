@@ -52,7 +52,7 @@ def stream_movie(movie):
         print(f"❌ ERROR: Missing URL for movie '{title}'")
         return
 
-    overlay_text = escape_special_chars(title)
+    overlay_text = escape_drawtext(title)
 
     command = [
         "ffmpeg", "-re", "-fflags", "nobuffer", "-i", url, "-i", OVERLAY, "-filter_complex",
