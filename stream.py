@@ -36,9 +36,9 @@ def load_movies():
         print(f"❌ ERROR: Failed to load {PLAY_FILE} - {str(e)}")
         return []
 
-def escape_special_chars(text):
-    """Escape all common special characters."""
-    special_chars = r'''!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~'''
+def escape_drawtext(text):
+    """Escape all special characters for FFmpeg drawtext filter."""
+    special_chars = r'''!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~\\'''
     for char in special_chars:
         text = text.replace(char, f"\\{char}")
     return text
