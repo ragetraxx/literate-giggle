@@ -37,11 +37,8 @@ def load_movies():
         return []
 
 def escape_drawtext(text):
-    """Escape all special characters for FFmpeg drawtext filter."""
-    special_chars = r'''!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~\\'''
-    for char in special_chars:
-        text = text.replace(char, f"\\{char}")
-    return text
+    """Escape only necessary characters for FFmpeg drawtext without showing visible backslashes."""
+    return text.replace('\\', '\\\\\\\\').replace(':', '\\:').replace("'", "\\'")
 
 def stream_movie(movie):
     """Stream a single movie using FFmpeg."""
