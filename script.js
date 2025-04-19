@@ -7,13 +7,14 @@ function fetchStations() {
     }
 
     let url;
-    
+    const apiBaseUrl = 'https://api.radio-browser.info/apps/v2'; // Latest API base URL
+
     if (query.length === 2) {
         // If input is a 2-letter code, assume it's a country code
-        url = `https://de1.api.radio-browser.info/json/stations/bycountrycodeexact/${query.toUpperCase()}`;
+        url = `${apiBaseUrl}/stations/bycountrycodeexact/${query.toUpperCase()}`;
     } else {
         // Otherwise, search by station name
-        url = `https://de1.api.radio-browser.info/json/stations/byname/${encodeURIComponent(query)}`;
+        url = `${apiBaseUrl}/stations/byname/${encodeURIComponent(query)}`;
     }
 
     fetch(url)
