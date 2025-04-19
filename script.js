@@ -7,7 +7,7 @@ function fetchStations() {
     }
 
     let url;
-    const apiBaseUrl = 'http://fi1.api.radio-browser.info/json';
+    const apiBaseUrl = 'https://fi1.api.radio-browser.info/json';
 
     if (query.length === 2) {
         // 2-letter country code
