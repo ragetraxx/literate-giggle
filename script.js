@@ -7,13 +7,13 @@ function fetchStations() {
     }
 
     let url;
-    const apiBaseUrl = 'https://api.radio-browser.info/apps/v2'; // Latest API base URL
+    const apiBaseUrl = 'http://fi1.api.radio-browser.info/json';
 
     if (query.length === 2) {
-        // If input is a 2-letter code, assume it's a country code
+        // 2-letter country code
         url = `${apiBaseUrl}/stations/bycountrycodeexact/${query.toUpperCase()}`;
     } else {
-        // Otherwise, search by station name
+        // Search by station name
         url = `${apiBaseUrl}/stations/byname/${encodeURIComponent(query)}`;
     }
 
@@ -38,7 +38,7 @@ function displayStations(stations) {
         stationItem.innerHTML = `
             <img src="${station.favicon || 'default.png'}" alt="Logo">
             <p>${station.name}</p>
-            <button onclick="playRadio('${station.url}', '${station.name}', '${station.favicon}')">▶ Play</button>
+            <button onclick="playRadio('${station.url_resolved}', '${station.name}', '${station.favicon}')">▶ Play</button>
         `;
         container.appendChild(stationItem);
     });
@@ -55,7 +55,6 @@ function playRadio(url, name, logo) {
     document.getElementById("radio-player").src = url;
     document.getElementById("player-container").style.display = "flex";
 
-    // Start playing
     document.getElementById("radio-player").play();
 }
 
