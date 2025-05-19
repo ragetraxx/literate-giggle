@@ -14,6 +14,11 @@
     </header>
 
     <main>
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Enter country code or station name">
+            <button onclick="fetchStations()">Search</button>
+        </div>
+
         <section class="featured-stations">
             <h2>Featured Stations</h2>
             <div class="station-list">
@@ -47,11 +52,6 @@
                 </div>
             </div>
         </section>
-
-        <div class="search-container">
-            <input type="text" id="search-input" placeholder="Enter country code or station name">
-            <button onclick="fetchStations()">Search</button>
-        </div>
 
         <div id="station-list" class="station-list">
             <p>Enter a country code or station name and press search.</p>
