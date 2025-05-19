@@ -20,21 +20,34 @@ header {
     margin-right: 10px;
 }
 
+/* Search Bar Styling */
 .search-container {
-    margin: 20px;
+    margin: 20px auto;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
-input {
+.search-container input {
     padding: 10px;
-    width: 200px;
+    width: 250px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
 }
 
-button {
-    padding: 10px;
+.search-container button {
+    padding: 10px 15px;
     cursor: pointer;
-    background: blue;
+    background: #007BFF;
     color: white;
     border: none;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.search-container button:hover {
+    background: #0056b3;
 }
 
 .station-list {
