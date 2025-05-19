@@ -1,130 +1,114 @@
 body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    margin: 0;
-    padding: 0;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 0;
 }
 
 header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px;
-    background: #333;
-    color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  background: #333;
+  color: white;
 }
 
 .logo {
-    width: 50px;
-    height: 50px;
-    margin-right: 10px;
+  width: 50px;
+  height: 50px;
+  margin-right: 10px;
 }
 
-/* Search Bar Styling */
 .search-container {
-    margin: 20px auto;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    flex-wrap: wrap;
+  margin: 20px;
 }
 
-.search-container input {
-    padding: 10px;
-    width: 250px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+input {
+  padding: 10px;
+  width: 200px;
 }
 
-.search-container button {
-    padding: 10px 15px;
-    cursor: pointer;
-    background: #007BFF;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    transition: background 0.3s;
-}
-
-.search-container button:hover {
-    background: #0056b3;
+button {
+  padding: 10px;
+  cursor: pointer;
+  background: blue;
+  color: white;
+  border: none;
 }
 
 .station-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 30px;
 }
 
 .station {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    border: 1px solid #ddd;
-    width: 300px;
-    cursor: pointer;
-    background-color: #fff;
-    border-radius: 8px;
-    transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #ddd;
+  width: 300px;
+  cursor: pointer;
+  background-color: #fff;
+  border-radius: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .station:hover {
-    transform: scale(1.03);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transform: scale(1.03);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .station img {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    margin-right: 10px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 10px;
 }
 
 .player-container {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    align-items: center;
-    justify-content: center;
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  align-items: center;
+  justify-content: center;
 }
 
 .player {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
 }
 
 .player-logo {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    animation: spin 3s linear infinite;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  animation: spin 3s linear infinite;
 }
 
 @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-/* Featured Stations Section */
 .featured-stations {
-    padding: 20px;
-    background-color: #f9f9f9;
+  padding: 20px;
+  background-color: #f9f9f9;
 }
 
 .featured-stations h2 {
-    margin-bottom: 20px;
-}
-
-.featured-stations .station-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
+  margin-bottom: 20px;
 }
