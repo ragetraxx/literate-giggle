@@ -1,86 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Radio Player</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Live Radio Player</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <header>
+    <img src="logo.png" alt="Website Logo" class="logo" />
+    <h1>Live Radio Player</h1>
+  </header>
 
-    <header>
-        <img src="logo.png" alt="Website Logo" class="logo">
-        <h1>Live Radio Player</h1>
-    </header>
-
-    <main>
-        <div class="search-container">
-            <input type="text" id="search-input" placeholder="Enter country code or station name">
-            <button onclick="fetchStations()">Search</button>
-        </div>
-
-        <section class="featured-stations">
-            <h2>Featured Stations</h2>
-            <div class="station-list">
-                <div class="station" onclick="playStation('https://stream.zeno.fm/d42hdvx96zhvv', 'Clubmix', 'https://i.imgur.com/mtxns7R.png')">
-                    <img src="https://i.imgur.com/mtxns7R.png" alt="Clubmix">
-                    <p>Clubmix</p>
-                </div>
-                <div class="station" onclick="playStation('https://stream.zeno.fm/03v7z8edgphvv', 'Emotions', 'https://i.imgur.com/nOBT9dU.png')">
-                    <img src="https://i.imgur.com/nOBT9dU.png" alt="Emotions">
-                    <p>Emotions</p>
-                </div>
-                <div class="station" onclick="playStation('https://stream.zeno.fm/q1n2wyfs7x8uv', 'Rage Music Philippines', 'https://i.imgur.com/a3iXI35.png')">
-                    <img src="https://i.imgur.com/a3iXI35.png" alt="Rage Music Philippines">
-                    <p>Rage Music Philippines</p>
-                </div>
-                <div class="station" onclick="playStation('https://stream.zeno.fm/c3z135w8zxhvv', 'Scream Radio', 'https://i.imgur.com/WhCxsNJ.png')">
-                    <img src="https://i.imgur.com/WhCxsNJ.png" alt="Scream Radio">
-                    <p>Scream Radio</p>
-                </div>
-                <div class="station" onclick="playStation('https://stream.zeno.fm/4k8qf4raqy8uv', 'Vibe Radio', 'https://i.imgur.com/JbkwiBQ.png')">
-                    <img src="https://i.imgur.com/JbkwiBQ.png" alt="Vibe Radio">
-                    <p>Vibe Radio</p>
-                </div>
-                <div class="station" onclick="playStation('https://stream.zeno.fm/qrhuqbnm208uv', 'Hot Hiphop N RnB', 'https://i.imgur.com/nfFWyYR.png')">
-                    <img src="https://i.imgur.com/nfFWyYR.png" alt="Hot Hiphop N RnB">
-                    <p>Hot Hiphop N RnB</p>
-                </div>
-                <div class="station" onclick="playStation('https://stream.zeno.fm/xnuifxjgpomvv', 'iMix Radio', 'https://i.imgur.com/CLD1X1t.png')">
-                    <img src="https://i.imgur.com/CLD1X1t.png" alt="iMix Radio">
-                    <p>iMix Radio</p>
-                </div>
-            </div>
-        </section>
-
-        <div id="station-list" class="station-list">
-            <p>Enter a country code or station name and press search.</p>
-        </div>
-    </main>
-
-    <div id="player-container" class="player-container">
-        <div class="player">
-            <img id="player-logo" src="default.png" alt="Station Logo" class="player-logo">
-            <h2 id="player-title">Now Playing</h2>
-            <audio id="radio-player" controls></audio>
-            <button onclick="closePlayer()">Close</button>
-        </div>
+  <main>
+    <div class="search-container">
+      <input
+        type="text"
+        id="search-input"
+        placeholder="Enter country code or station name"
+        oninput="filterFeaturedStations()"
+      />
+      <button onclick="fetchStations()">Search</button>
     </div>
 
-    <script>
-        function playStation(streamUrl, title, logo) {
-            document.getElementById('radio-player').src = streamUrl;
-            document.getElementById('player-title').innerText = title;
-            document.getElementById('player-logo').src = logo;
-            document.getElementById('player-container').style.display = 'flex';
-        }
+    <div id="search-results" class="station-list"></div>
 
-        function closePlayer() {
-            document.getElementById('radio-player').pause();
-            document.getElementById('player-container').style.display = 'none';
-        }
-    </script>
-    <script src="script.js"></script>
+    <section class="featured-stations">
+      <h2>Featured Stations</h2>
+      <div class="station-list" id="featured-stations">
+        <div class="station" onclick="playStation('https://stream.zeno.fm/d42hdvx96zhvv', 'Clubmix', 'https://i.imgur.com/mtxns7R.png')">
+          <img src="https://i.imgur.com/mtxns7R.png" alt="Clubmix" />
+          <p>Clubmix</p>
+        </div>
+        <div class="station" onclick="playStation('https://stream.zeno.fm/03v7z8edgphvv', 'Emotions', 'https://i.imgur.com/nOBT9dU.png')">
+          <img src="https://i.imgur.com/nOBT9dU.png" alt="Emotions" />
+          <p>Emotions</p>
+        </div>
+        <div class="station" onclick="playStation('https://stream.zeno.fm/q1n2wyfs7x8uv', 'Rage Music Philippines', 'https://i.imgur.com/a3iXI35.png')">
+          <img src="https://i.imgur.com/a3iXI35.png" alt="Rage Music Philippines" />
+          <p>Rage Music Philippines</p>
+        </div>
+        <div class="station" onclick="playStation('https://stream.zeno.fm/c3z135w8zxhvv', 'Scream Radio', 'https://i.imgur.com/WhCxsNJ.png')">
+          <img src="https://i.imgur.com/WhCxsNJ.png" alt="Scream Radio" />
+          <p>Scream Radio</p>
+        </div>
+        <div class="station" onclick="playStation('https://stream.zeno.fm/4k8qf4raqy8uv', 'Vibe Radio', 'https://i.imgur.com/JbkwiBQ.png')">
+          <img src="https://i.imgur.com/JbkwiBQ.png" alt="Vibe Radio" />
+          <p>Vibe Radio</p>
+        </div>
+        <div class="station" onclick="playStation('https://stream.zeno.fm/qrhuqbnm208uv', 'Hot Hiphop N RnB', 'https://i.imgur.com/nfFWyYR.png')">
+          <img src="https://i.imgur.com/nfFWyYR.png" alt="Hot Hiphop N RnB" />
+          <p>Hot Hiphop N RnB</p>
+        </div>
+        <div class="station" onclick="playStation('https://stream.zeno.fm/xnuifxjgpomvv', 'iMix Radio', 'https://i.imgur.com/CLD1X1t.png')">
+          <img src="https://i.imgur.com/CLD1X1t.png" alt="iMix Radio" />
+          <p>iMix Radio</p>
+        </div>
+      </div>
+    </section>
+  </main>
 
+  <div id="player-container" class="player-container">
+    <div class="player">
+      <img id="player-logo" src="default.png" alt="Station Logo" class="player-logo" />
+      <h2 id="player-title">Now Playing</h2>
+      <audio id="radio-player" controls></audio>
+      <button onclick="closePlayer()">Close</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
