@@ -35,14 +35,11 @@ def escape_drawtext(text):
 def build_ffmpeg_command(url, title):
     text = escape_drawtext(title)
 
-    # Extra headers if streaming from m3u8 or custom servers
-    input_options = []
-    if ".m3u8" in url or "streamsvr" in url:
-        print(f"🔐 Spoofing VLC headers for {url}")
-        input_options = [
-            "-user_agent", "VLC/3.0.18 LibVLC/3.0.18",  # ✅ Pretend to be VLC
-            "-headers", "Referer: https://hollymoviehd.cc\r\n"
-        ]
+    # ✅ Always spoof VLC User-Agent for all formats
+    input_options = [
+        "-user_agent", "VLC/3.0.18 LibVLC/3.0.18",
+        "-headers", "Referer: https://hollymoviehd.cc\r\n"
+    ]
 
     return [
         "ffmpeg",
