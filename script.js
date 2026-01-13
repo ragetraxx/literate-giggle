@@ -7,7 +7,7 @@ function fetchStations() {
   }
 
   let url;
-  const apiBaseUrl = 'https://fi1.api.radio-browser.info/json';
+  const apiBaseUrl = 'https://de2.api.radio-browser.info/';
 
   if (query.length === 2) {
     url = `${apiBaseUrl}/stations/bycountrycodeexact/${query.toUpperCase()}`;
